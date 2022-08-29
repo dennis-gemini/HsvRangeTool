@@ -1,11 +1,12 @@
 import sys
 import os
+from glob import glob
 
 from PyQt5 import uic
 from PyQt5 import QtGui
 from PyQt5.QtCore import QSize
-from PyQt5.QtGui import QColor, QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QMainWindow, QLabel, QPushButton, QSlider
+from PyQt5.QtGui import QColor, QImage, QPixmap, QKeySequence
+from PyQt5.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QMainWindow, QLabel, QPushButton, QSlider, QShortcut
 import cv2
 import numpy as np
 import os
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow):
 
     lowerHSV = (0, 0, 0)
     upperHSV = (179, 255, 255)
+    fileName = ""
 
     imgRaw = None
     imgMask = None
@@ -64,9 +66,26 @@ class MainWindow(QMainWindow):
         self.sliderErotion = self.findChild(QSlider, "sliderErotion")
         self.cboxDilate = self.findChild(QCheckBox, "cboxDilate")
         self.sliderDilation = self.findChild(QSlider, "sliderDilation")
+        self.cboxErode2 = self.findChild(QCheckBox, "cboxErode2")
+        self.sliderErotion2 = self.findChild(QSlider, "sliderErotion2")
+        self.cboxDilate2 = self.findChild(QCheckBox, "cboxDilate2")
+        self.sliderDilation2 = self.findChild(QSlider, "sliderDilation2")
+
+        self.cboxCutHeader = self.findChild(QCheckBox, "cboxCutHeader")
+        self.sliderCutHeader = self.findChild(QSlider, "sliderCutHeader")
+        self.cboxCutFooter = self.findChild(QCheckBox, "cboxCutFooter")
+        self.sliderCutFooter = self.findChild(QSlider, "sliderCutFooter")
+        self.sliderCutFooter.setMaximum(480)
+        self.sliderCutFooter.setValue(480)
 
         self.btnOpen = self.findChild(QPushButton, "btnOpen")
         self.btnCopy = self.findChild(QPushButton, "btnCopy")
+
+        self.btnFirst    = self.findChild(QPushButton, "btnFirst")
+        self.btnPrev     = self.findChild(QPushButton, "btnPrev")
+        self.btnNext     = self.findChild(QPushButton, "btnNext")
+        self.btnLast     = self.findChild(QPushButton, "btnLast")
+        self.lblFileName = self.findChild(QLabel, "lblFileName")
 
         self.init_handler()
         self.loadHsvSpace()
@@ -83,14 +102,49 @@ class MainWindow(QMainWindow):
         self.btnOpen.clicked.connect(self.onBtnOpenClicked)
         self.btnCopy.clicked.connect(self.onBtnCopyClicked)
 
+        self.btnFirst.clicked.connect(self.onBtnFirstClicked)
+        self.btnPrev.clicked.connect(self.onBtnPrevClicked)
+        self.btnNext.clicked.connect(self.onBtnNextClicked)
+        self.btnLast.clicked.connect(self.onBtnLastClicked)
+
+        self.keyUp    = QShortcut(QKeySequence("Up"   ), self); self.keyUp.activated.connect(self.onBtnPrevClicked)
+        self.keyDown  = QShortcut(QKeySequence("Down" ), self); self.keyDown.activated.connect(self.onBtnNextClicked)
+        self.keyLeft  = QShortcut(QKeySequence("Left" ), self); self.keyLeft.activated.connect(self.onBtnPrevClicked)
+        self.keyRight = QShortcut(QKeySequence("Right"), self); self.keyRight.activated.connect(self.onBtnNextClicked)
+        self.keyHome  = QShortcut(QKeySequence("Home" ), self); self.keyHome.activated.connect(self.onBtnFirstClicked)
+        self.keyEnd   = QShortcut(QKeySequence("End"  ), self); self.keyEnd.activated.connect(self.onBtnLastClicked)
+
         self.cboxDilate.stateChanged.connect(self.updateMask)
         self.cboxErode.stateChanged.connect(self.updateMask)
         self.sliderErotion.valueChanged.connect(self.onSliderErodeChanged)
         self.sliderDilation.valueChanged.connect(self.onSliderDilateChanged)
+        self.cboxDilate2.stateChanged.connect(self.updateMask)
+        self.cboxErode2.stateChanged.connect(self.updateMask)
+        self.sliderErotion2.valueChanged.connect(self.onSliderErode2Changed)
+        self.sliderDilation2.valueChanged.connect(self.onSliderDilate2Changed)
+
+        self.cboxCutHeader.stateChanged.connect(self.updateMask)
+        self.cboxCutFooter.stateChanged.connect(self.updateMask)
+        self.sliderCutHeader.valueChanged.connect(self.onSliderCutHeaderChanged)
+        self.sliderCutFooter.valueChanged.connect(self.onSliderCutFooterChanged)
 
     def onBtnCopyClicked(self):
-        print("Upper HSV: ", self.upperHSV)
+        print("====================")
         print("Lower HSV: ", self.lowerHSV)
+        print("Upper HSV: ", self.upperHSV)
+
+        if self.cboxCutHeader.isChecked() and self.sliderCutHeader.value() > 0:
+            print("Cut Header: ", self.sliderCutHeader.value())
+        if self.cboxCutFooter.isChecked() and self.sliderCutFooter.value() < self.sliderCutFooter.maximum():
+            print("Cut Footer: ", self.sliderCutFooter.value())
+        if self.cboxErode.isChecked():
+            print("Erode: ", self.sliderErotion.value())
+        if self.cboxDilate.isChecked():
+            print("Dilate: ", self.sliderDilation.value())
+        if self.cboxErode2.isChecked():
+            print("Erode: ", self.sliderErotion2.value())
+        if self.cboxDilate2.isChecked():
+            print("Dilate: ", self.sliderDilation2.value())
 
     # =========== Helper ===========
     def updatePreviewHsvSpace(self):
@@ -105,6 +159,7 @@ class MainWindow(QMainWindow):
             frame_HSV, lower_orange, upper_orange)
 
         frame_threshold = cv2.bitwise_and(self.imgHsvSpace, self.imgHsvSpace, mask=frame_threshold)
+
         _asQImage = QImage(
             frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
@@ -151,6 +206,18 @@ class MainWindow(QMainWindow):
         # self.imgRaw = img.scaledToHeight(self.previewMask.size().height())
         self.previewRaw.setPixmap(QPixmap.fromImage(
             _imgAsQImg).scaledToWidth(self.previewRaw.size().width()))
+        self.updateMask()
+        self.updateHSVPreview()
+
+        height, width = img.shape[:2]
+        self.sliderCutHeader.setMaximum(height)
+
+        if self.sliderCutFooter.maximum() == self.sliderCutFooter.value():
+            self.sliderCutFooter.setMaximum(height)
+            self.sliderCutFooter.setValue(height)
+        else:
+            self.sliderCutFooter.setMaximum(height)
+
 
     def updateMask(self):
         if self.imgRaw is None:
@@ -171,6 +238,22 @@ class MainWindow(QMainWindow):
             _kernel = self.sliderDilation.value()
             frame_threshold = cv2.dilate(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
 
+        if self.cboxErode2.isChecked():
+            _kernel = self.sliderErotion2.value()
+            frame_threshold = cv2.erode(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
+        
+        if self.cboxDilate2.isChecked():
+            _kernel = self.sliderDilation2.value()
+            frame_threshold = cv2.dilate(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
+
+        if self.cboxCutHeader.isChecked():
+            _cut_header = self.sliderCutHeader.value()
+            frame_threshold = cv2.rectangle(frame_threshold, (0, 0), (frame_threshold.shape[1], _cut_header), False, -1)
+
+        if self.cboxCutFooter.isChecked():
+            _cut_footer = self.sliderCutFooter.value()
+            frame_threshold = cv2.rectangle(frame_threshold, (0, _cut_footer), (frame_threshold.shape[1], frame_threshold.shape[0]), False, -1)
+
         self.updateMaskedRaw(frame_threshold)
         frame_threshold = cv2.cvtColor(frame_threshold, cv2.COLOR_GRAY2RGB)
 
@@ -185,6 +268,18 @@ class MainWindow(QMainWindow):
             return
 
         frame_threshold = cv2.bitwise_and(self.imgRaw, self.imgRaw, mask=masking)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+        edges = cv2.GaussianBlur(masking, (5, 5), 0)
+        edges = cv2.Canny(edges, 50, 150)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations = 2)
+
+        contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for c in sorted(contours, key = cv2.contourArea, reverse = True):
+            epsilon = 0.01 * cv2.arcLength(c, True) 
+            approx  = cv2.approxPolyDP(c, epsilon, True)
+            cv2.drawContours(frame_threshold, [approx], 0, (255, 0, 0), 1)
+
         _asQImage = QImage(
             frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
@@ -234,16 +329,73 @@ class MainWindow(QMainWindow):
         self.cboxDilate.setText(f"Dilate {self.sliderDilation.value()}")
         self.updateMask()
 
+    def onSliderErode2Changed(self):
+        self.cboxErode2.setText(f"Erode {self.sliderErotion2.value()}")
+        self.updateMask()
+
+    def onSliderDilate2Changed(self):
+        self.cboxDilate2.setText(f"Dilate {self.sliderDilation2.value()}")
+        self.updateMask()
+
+    def onSliderCutHeaderChanged(self):
+        self.cboxCutHeader.setText(f"Cut Header {self.sliderCutHeader.value()}")
+        self.updateMask()
+
+    def onSliderCutFooterChanged(self):
+        self.cboxCutFooter.setText(f"Cut Footer {self.sliderCutFooter.value()}")
+        self.updateMask()
+
+    def _loadImageFile(self, fileName):
+        self.updateRawImg(cv2.imread(fileName))
+        self.fileName = fileName
+        self.lblFileName.setText(os.path.basename(fileName))
+
     def onBtnOpenClicked(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(
             self, "QFileDialog.getOpenFileName()", "", "All Files (*);;Jpeg (*.jpeg);;BMP (*.bmp)", options=options)
         if not fileName:
             return
+        self._loadImageFile(fileName)
+
         # self.srcQimg = QImage(fileName=fileName, format=QImage.Format_RGB32)
-        self.updateRawImg(cv2.imread(fileName))
+        # self.updateRawImg(cv2.imread(fileName))
         # with open(fileName, 'rb') as f:
         #     self.updateRawImg(QImage.fromData(f.read()))
+
+    def onBtnFirstClicked(self):
+        if self.fileName:
+            files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
+
+            if len(files) > 0:
+                self._loadImageFile(files[0])
+
+    def onBtnPrevClicked(self):
+        if self.fileName:
+            files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
+
+            for i, fileName in enumerate(files):
+                if self.fileName == fileName:
+                    if i > 0:
+                        self._loadImageFile(files[i - 1])
+                    return
+
+    def onBtnNextClicked(self):
+        if self.fileName:
+            files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
+
+            for i, fileName in enumerate(files):
+                if self.fileName == fileName:
+                    if i + 1 < len(files):
+                        self._loadImageFile(files[i + 1])
+                    return
+
+    def onBtnLastClicked(self):
+        if self.fileName:
+            files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
+
+            if len(files) > 0:
+                self._loadImageFile(files[-1])
 
 
 if __name__ == "__main__":
