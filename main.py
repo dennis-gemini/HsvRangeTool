@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         uic.loadUi(os.path.join(os.path.dirname(
             __file__), "./assets/main_window.ui"), self)
+        self.showMaximized()
 
         self.sliderH = self.findChild(QSlider, "sliderH")
         self.sliderS = self.findChild(QSlider, "sliderS")
