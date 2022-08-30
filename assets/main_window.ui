@@ -415,63 +415,105 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>Trim Header/Footer</string>
+         <string>Trim Borders</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_14">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_13">
-           <item>
-            <widget class="QCheckBox" name="cboxTrimHeader">
-             <property name="text">
-              <string>Trim Header</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSlider" name="sliderTrimHeader">
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="singleStep">
-              <number>1</number>
-             </property>
-             <property name="pageStep">
-              <number>10</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
+        <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="cboxTrimHeader">
+           <property name="text">
+            <string>Trim Header</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSlider" name="sliderTrimHeader">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="cboxTrimFooter">
+           <property name="text">
+            <string>Trim Footer</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QSlider" name="sliderTrimFooter">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
          </item>
 
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_14">
-           <item>
-            <widget class="QCheckBox" name="cboxTrimFooter">
-             <property name="text">
-              <string>Trim Footer</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSlider" name="sliderTrimFooter">
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="singleStep">
-              <number>1</number>
-             </property>
-             <property name="pageStep">
-              <number>10</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cboxTrimLeft">
+           <property name="text">
+            <string>Trim Left</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSlider" name="sliderTrimLeft">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="cboxTrimRight">
+           <property name="text">
+            <string>Trim Right</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QSlider" name="sliderTrimRight">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -482,27 +524,6 @@
         <property name="topMargin">
          <number>0</number>
         </property>
-        <item row="4" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
-          <item>
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Lower:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLower">
-            <property name="alignment">
-             <enum>Qt::AlignRight</enum>
-            </property>
-            <property name="text">
-             <string>H 0; S 0; V 0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
         <item row="1" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_14">
           <item>
@@ -543,11 +564,61 @@
          </layout>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string></string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_18">
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Profile</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cboxProfile">
+            <property name="insertPolicy">
+             <enum>QComboBox::InsertAtTop</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContents</enum>
+            </property>
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSnapshotProfile">
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteProfile">
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>-</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnResetProfile">
+            <property name="text">
+             <string>Reset</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="1" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_14">
@@ -578,12 +649,12 @@
          <widget class="QComboBox" name="cboxSetMode">
           <item>
            <property name="text">
-            <string>UPPER</string>
+            <string>Upper HSV</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>LOWER</string>
+            <string>Lower HSV</string>
            </property>
           </item>
          </widget>
@@ -631,18 +702,32 @@
          </layout>
         </item>
         <item row="3" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
-          <item>
+         <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Lower:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="lblLower">
+            <property name="text">
+             <string>0, 0, 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_14">
             <property name="text">
              <string>Upper:</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="0" column="3">
            <widget class="QLabel" name="lblUpper">
             <property name="text">
-             <string>H 179; S 255; V 255</string>
+             <string>179, 255, 255</string>
             </property>
            </widget>
           </item>

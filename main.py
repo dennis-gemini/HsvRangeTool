@@ -5,7 +5,7 @@ from glob import glob
 
 from PyQt5 import uic
 from PyQt5 import QtGui
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QColor, QImage, QPixmap, QKeySequence
 from PyQt5.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QMainWindow, QLabel, QPushButton, QSlider, QShortcut
 import cv2
@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
     lowerHSV = (0, 0, 0)
     upperHSV = (179, 255, 255)
     fileName = ""
+    settings = {}
 
     imgRaw = None
     imgMask = None
@@ -64,37 +65,50 @@ class MainWindow(QMainWindow):
 
         self.cboxSetMode = self.findChild(QComboBox, "cboxSetMode")
 
-        self.cboxErode = self.findChild(QCheckBox, "cboxErode")
-        self.sliderErotion = self.findChild(QSlider, "sliderErotion")
-        self.cboxDilate = self.findChild(QCheckBox, "cboxDilate")
-        self.sliderDilation = self.findChild(QSlider, "sliderDilation")
-        self.cboxErode2 = self.findChild(QCheckBox, "cboxErode2")
-        self.sliderErotion2 = self.findChild(QSlider, "sliderErotion2")
-        self.cboxDilate2 = self.findChild(QCheckBox, "cboxDilate2")
-        self.sliderDilation2 = self.findChild(QSlider, "sliderDilation2")
+        self.cboxErode        = self.findChild(QCheckBox, "cboxErode"      )
+        self.sliderErotion    = self.findChild(QSlider,   "sliderErotion"  )
+        self.cboxDilate       = self.findChild(QCheckBox, "cboxDilate"     )
+        self.sliderDilation   = self.findChild(QSlider,   "sliderDilation" )
+        self.cboxErode2       = self.findChild(QCheckBox, "cboxErode2"     )
+        self.sliderErotion2   = self.findChild(QSlider,   "sliderErotion2" )
+        self.cboxDilate2      = self.findChild(QCheckBox, "cboxDilate2"    )
+        self.sliderDilation2  = self.findChild(QSlider,   "sliderDilation2")
 
-        self.cboxTrimHeader   = self.findChild(QCheckBox, "cboxTrimHeader")
-        self.sliderTrimHeader = self.findChild(QSlider, "sliderTrimHeader")
-        self.cboxTrimFooter   = self.findChild(QCheckBox, "cboxTrimFooter")
-        self.sliderTrimFooter = self.findChild(QSlider, "sliderTrimFooter")
+        self.cboxTrimHeader   = self.findChild(QCheckBox, "cboxTrimHeader"  )
+        self.sliderTrimHeader = self.findChild(QSlider,   "sliderTrimHeader")
+        self.cboxTrimFooter   = self.findChild(QCheckBox, "cboxTrimFooter"  )
+        self.sliderTrimFooter = self.findChild(QSlider,   "sliderTrimFooter")
+        self.cboxTrimLeft     = self.findChild(QCheckBox, "cboxTrimLeft"    )
+        self.sliderTrimLeft   = self.findChild(QSlider,   "sliderTrimLeft"  )
+        self.cboxTrimRight    = self.findChild(QCheckBox, "cboxTrimRight"   )
+        self.sliderTrimRight  = self.findChild(QSlider,   "sliderTrimRight" )
 
         self.sliderTrimHeader.setMaximum(480)
         self.sliderTrimHeader.setValue(0)
         self.sliderTrimFooter.setMaximum(480)
         self.sliderTrimFooter.setValue(480)
+        self.sliderTrimLeft.setMaximum(640)
+        self.sliderTrimLeft.setValue(0)
+        self.sliderTrimRight.setMaximum(640)
+        self.sliderTrimRight.setValue(640)
 
         self.btnOpen = self.findChild(QPushButton, "btnOpen")
         self.btnCopy = self.findChild(QPushButton, "btnCopy")
 
-        self.btnFirst      = self.findChild(QPushButton, "btnFirst")
-        self.btnPrev       = self.findChild(QPushButton, "btnPrev")
-        self.btnNext       = self.findChild(QPushButton, "btnNext")
-        self.btnLast       = self.findChild(QPushButton, "btnLast")
-        self.lblFileName   = self.findChild(QLabel,      "lblFileName")
-        self.lblFolderName = self.findChild(QLabel,      "lblFolderName")
+        self.btnFirst           = self.findChild(QPushButton, "btnFirst")
+        self.btnPrev            = self.findChild(QPushButton, "btnPrev")
+        self.btnNext            = self.findChild(QPushButton, "btnNext")
+        self.btnLast            = self.findChild(QPushButton, "btnLast")
+        self.lblFileName        = self.findChild(QLabel,      "lblFileName")
+        self.lblFolderName      = self.findChild(QLabel,      "lblFolderName")
 
-        self.btnLoad       = self.findChild(QPushButton, "btnLoad")
-        self.btnSave       = self.findChild(QPushButton, "btnSave")
+        self.btnLoad            = self.findChild(QPushButton, "btnLoad")
+        self.btnSave            = self.findChild(QPushButton, "btnSave")
+
+        self.cboxProfile        = self.findChild(QComboBox,   "cboxProfile")
+        self.btnSnapshotProfile = self.findChild(QPushButton, "btnSnapshotProfile")
+        self.btnDeleteProfile   = self.findChild(QPushButton, "btnDeleteProfile")
+        self.btnResetProfile    = self.findChild(QPushButton, "btnResetProfile")
 
         self.init_handler()
         self.loadHsvSpace()
@@ -143,26 +157,41 @@ class MainWindow(QMainWindow):
 
         self.cboxTrimHeader.stateChanged.connect(self.updateMask)
         self.cboxTrimFooter.stateChanged.connect(self.updateMask)
+        self.cboxTrimLeft.stateChanged.connect(self.updateMask)
+        self.cboxTrimRight.stateChanged.connect(self.updateMask)
         self.sliderTrimHeader.valueChanged.connect(self.onSliderTrimHeaderChanged)
         self.sliderTrimFooter.valueChanged.connect(self.onSliderTrimFooterChanged)
+        self.sliderTrimLeft.valueChanged.connect(self.onSliderTrimLeftChanged)
+        self.sliderTrimRight.valueChanged.connect(self.onSliderTrimRightChanged)
+
+        self.cboxProfile.textActivated.connect(self.onActivateProfile)
+        self.btnSnapshotProfile.clicked.connect(self.onSnapshotProfile)
+        self.btnDeleteProfile.clicked.connect(self.onDeleteProfile)
+        self.btnResetProfile.clicked.connect(self.onResetProfile)
 
     def onBtnCopyClicked(self):
         print("====================")
         print("Lower HSV: ", self.lowerHSV)
         print("Upper HSV: ", self.upperHSV)
 
+        if self.cboxErode.isChecked():
+            print("Erode1: ", self.sliderErotion.value())
+        if self.cboxDilate.isChecked():
+            print("Dilate1: ", self.sliderDilation.value())
+        if self.cboxErode2.isChecked():
+            print("Erode2: ", self.sliderErotion2.value())
+        if self.cboxDilate2.isChecked():
+            print("Dilate2: ", self.sliderDilation2.value())
+
         if self.cboxTrimHeader.isChecked() and self.sliderTrimHeader.value() > 0:
             print("Trim Header: ", self.sliderTrimHeader.value())
         if self.cboxTrimFooter.isChecked() and self.sliderTrimFooter.value() < self.sliderTrimFooter.maximum():
             print("Trim Footer: ", self.sliderTrimFooter.value())
-        if self.cboxErode.isChecked():
-            print("Erode: ", self.sliderErotion.value())
-        if self.cboxDilate.isChecked():
-            print("Dilate: ", self.sliderDilation.value())
-        if self.cboxErode2.isChecked():
-            print("Erode: ", self.sliderErotion2.value())
-        if self.cboxDilate2.isChecked():
-            print("Dilate: ", self.sliderDilation2.value())
+        if self.cboxTrimLeft.isChecked() and self.sliderTrimLeft.value() < self.sliderTrimLeft.maximum():
+            print("Trim Left: ", self.sliderTrimLeft.value())
+        if self.cboxTrimRight.isChecked() and self.sliderTrimRight.value() < self.sliderTrimRight.maximum():
+            print("Trim Right: ", self.sliderTrimRight.value())
+
 
     # =========== Helper ===========
     def updatePreviewHsvSpace(self):
@@ -197,24 +226,24 @@ class MainWindow(QMainWindow):
             200, 300, QColor.fromHsv(self.selectedHue, self.selectedSaturation, self.selectedValue))
         self.previewV.setPixmap(QPixmap.fromImage(prevV))
 
-        if self.cboxSetMode.currentText() == "UPPER":
+        if self.cboxSetMode.currentIndex() == 0:
             self.upperHSV = (self.selectedHue // 2,
                              self.selectedSaturation, self.selectedValue)
             self.lblUpper.setText(
-                f"H {self.upperHSV[0]}; S {self.upperHSV[1]}; V {self.upperHSV[2]}")
-        elif self.cboxSetMode.currentText() == "LOWER":
+                f"{self.upperHSV[0]}, {self.upperHSV[1]}, {self.upperHSV[2]}")
+        elif self.cboxSetMode.currentIndex() == 1:
             self.lowerHSV = (self.selectedHue // 2,
                              self.selectedSaturation, self.selectedValue)
             self.lblLower.setText(
-                f"H {self.lowerHSV[0]}; S {self.lowerHSV[1]}; V {self.lowerHSV[2]}")
+                f"{self.lowerHSV[0]}, {self.lowerHSV[1]}, {self.lowerHSV[2]}")
         
         self.updateMask()
         self.updatePreviewHsvSpace()
 
+
     def updateRawImg(self, img):
         # _dsize = (self.previewRaw.size().height(),
         #           self.previewRaw.size().width())
-
         self.imgRaw = img
         self.refreshAllImg()
 
@@ -242,6 +271,14 @@ class MainWindow(QMainWindow):
             self.sliderTrimFooter.setValue(height)
         else:
             self.sliderTrimFooter.setMaximum(height)
+
+        self.sliderTrimLeft.setMaximum(width)
+
+        if self.sliderTrimRight.maximum() == self.sliderTrimRight.value():
+            self.sliderTrimRight.setMaximum(width)
+            self.sliderTrimRight.setValue(width)
+        else:
+            self.sliderTrimRight.setMaximum(width)
 
 
     def updateMask(self):
@@ -278,6 +315,14 @@ class MainWindow(QMainWindow):
         if self.cboxTrimFooter.isChecked():
             _trim_footer = self.sliderTrimFooter.value()
             frame_threshold = cv2.rectangle(frame_threshold, (0, _trim_footer), (frame_threshold.shape[1], frame_threshold.shape[0]), False, -1)
+
+        if self.cboxTrimLeft.isChecked():
+            _trim_left = self.sliderTrimLeft.value()
+            frame_threshold = cv2.rectangle(frame_threshold, (0, 0), (_trim_left, frame_threshold.shape[0]), False, -1)
+
+        if self.cboxTrimRight.isChecked():
+            _trim_right = self.sliderTrimRight.value()
+            frame_threshold = cv2.rectangle(frame_threshold, (_trim_right, 0), (frame_threshold.shape[1], frame_threshold.shape[0]), False, -1)
 
         self.updateMaskedRaw(frame_threshold)
         frame_threshold = cv2.cvtColor(frame_threshold, cv2.COLOR_GRAY2RGB)
@@ -316,11 +361,11 @@ class MainWindow(QMainWindow):
     # =========== EVENT HANDLER ===========
 
     def onCBoxModeChanged(self, text):
-        if text == "UPPER":
+        if self.cboxSetMode.currentIndex() == 0:
             self.selectedHue = self.upperHSV[0] * 2
             self.selectedSaturation = self.upperHSV[1]
             self.selectedValue = self.upperHSV[2]
-        elif text == "LOWER":
+        elif self.cboxSetMode.currentIndex() == 1:
             self.selectedHue = self.lowerHSV[0] * 2
             self.selectedSaturation = self.lowerHSV[1]
             self.selectedValue = self.lowerHSV[2]
@@ -348,26 +393,82 @@ class MainWindow(QMainWindow):
 
     def onSliderErodeChanged(self):
         self.cboxErode.setText(f"Erode {self.sliderErotion.value()}")
+
+        if self.sliderErotion.value() > 1 and not self.cboxErode.isChecked():
+            self.cboxErode.setChecked(True)
+        elif self.sliderErotion.value() <= 1 and self.cboxErode.isChecked():
+            self.cboxErode.setChecked(False)
+
         self.updateMask()
 
     def onSliderDilateChanged(self):
         self.cboxDilate.setText(f"Dilate {self.sliderDilation.value()}")
+
+        if self.sliderDilation.value() > 1 and not self.cboxDilate.isChecked():
+            self.cboxDilate.setChecked(True)
+        elif self.sliderDilation.value() <= 1 and self.cboxDilate.isChecked():
+            self.cboxDilate.setChecked(False)
+
         self.updateMask()
 
     def onSliderErode2Changed(self):
         self.cboxErode2.setText(f"Erode {self.sliderErotion2.value()}")
+
+        if self.sliderErotion2.value() > 1 and not self.cboxErode2.isChecked():
+            self.cboxErode2.setChecked(True)
+        elif self.sliderErotion2.value() <= 1 and self.cboxErode2.isChecked():
+            self.cboxErode2.setChecked(False)
+
         self.updateMask()
 
     def onSliderDilate2Changed(self):
         self.cboxDilate2.setText(f"Dilate {self.sliderDilation2.value()}")
+
+        if self.sliderDilation2.value() > 1 and not self.cboxDilate2.isChecked():
+            self.cboxDilate2.setChecked(True)
+        elif self.sliderDilation2.value() <= 1 and self.cboxDilate2.isChecked():
+            self.cboxDilate2.setChecked(False)
+
         self.updateMask()
 
     def onSliderTrimHeaderChanged(self):
         self.cboxTrimHeader.setText(f"Trim Header {self.sliderTrimHeader.value()}")
+
+        if self.sliderTrimHeader.value() > 0 and not self.cboxTrimHeader.isChecked():
+            self.cboxTrimHeader.setChecked(True)
+        elif self.sliderTrimHeader.value() == 0 and self.cboxTrimHeader.isChecked():
+            self.cboxTrimHeader.setChecked(False)
+
         self.updateMask()
 
     def onSliderTrimFooterChanged(self):
         self.cboxTrimFooter.setText(f"Trim Footer {self.sliderTrimFooter.value()}")
+
+        if self.sliderTrimFooter.value() < self.sliderTrimFooter.maximum() and not self.cboxTrimFooter.isChecked():
+            self.cboxTrimFooter.setChecked(True)
+        elif self.sliderTrimFooter.value() == self.sliderTrimFooter.maximum() and self.cboxTrimFooter.isChecked():
+            self.cboxTrimFooter.setChecked(False)
+
+        self.updateMask()
+
+    def onSliderTrimLeftChanged(self):
+        self.cboxTrimLeft.setText(f"Trim Left {self.sliderTrimLeft.value()}")
+
+        if self.sliderTrimLeft.value() > 0 and not self.cboxTrimLeft.isChecked():
+            self.cboxTrimLeft.setChecked(True)
+        elif self.sliderTrimLeft.value() == 0 and self.cboxTrimLeft.isChecked():
+            self.cboxTrimLeft.setChecked(False)
+
+        self.updateMask()
+
+    def onSliderTrimRightChanged(self):
+        self.cboxTrimRight.setText(f"Trim Right {self.sliderTrimRight.value()}")
+
+        if self.sliderTrimRight.value() < self.sliderTrimRight.maximum() and not self.cboxTrimRight.isChecked():
+            self.cboxTrimRight.setChecked(True)
+        elif self.sliderTrimRight.value() == self.sliderTrimRight.maximum() and self.cboxTrimRight.isChecked():
+            self.cboxTrimRight.setChecked(False)
+
         self.updateMask()
 
     def _loadImageFile(self, fileName):
@@ -427,22 +528,45 @@ class MainWindow(QMainWindow):
     def loadSettings(self):
         try:
             with open("HsvRangeTool.json") as f:
-                settings = json.load(f)
+                self.settings = json.load(f)
 
         except BaseException as e:
             print("Unable to load settings from HsvRangeTool.json: " + repr(e))
             return
 
+        self.syncProfile(self.settings.get("default", {}))
+
+        found = False
+        for profile in self.settings:
+            if profile in ("", "default"):
+                continue
+
+            ndx = self.cboxProfile.findText(profile, Qt.MatchExactly)
+            if ndx < 0:
+                self.cboxProfile.insertItem(0, profile)
+                ndx = 0
+
+            if self.settings[profile] == self.settings["default"]:
+                found = True
+                self.cboxProfile.setCurrentIndex(ndx)
+
+        if not found:
+            self.cboxProfile.setCurrentIndex(-1)
+
+        self.cboxProfile.clearFocus()
+
+
+    def syncProfile(self, profile):
         try:
             ################################################
-            self.upperHSV = tuple(settings.get("upper_hsv", [179, 255, 255]))
-            self.lowerHSV = tuple(settings.get("lower_hsv", [0, 0, 0]))
+            self.upperHSV = tuple(profile.get("upper_hsv", [179, 255, 255]))
+            self.lowerHSV = tuple(profile.get("lower_hsv", [0, 0, 0]))
 
-            if self.cboxSetMode.currentText() == "UPPER":
+            if self.cboxSetMode.currentIndex() == 0:
                 self.selectedHue        = self.upperHSV[0] * 2
                 self.selectedSaturation = self.upperHSV[1]
                 self.selectedValue      = self.upperHSV[2]
-            else:
+            elif self.cboxSetMode.currentIndex() == 1:
                 self.selectedHue        = self.lowerHSV[0] * 2
                 self.selectedSaturation = self.lowerHSV[1]
                 self.selectedValue      = self.lowerHSV[2]
@@ -452,10 +576,10 @@ class MainWindow(QMainWindow):
             self.sliderV.setValue(self.selectedValue)
 
             ################################################
-            erotion1  = settings.get("erotion1", 0)
-            dilation1 = settings.get("dilation1", 0)
-            erotion2  = settings.get("erotion2", 0)
-            dilation2 = settings.get("dilation2", 0)
+            erotion1  = profile.get("erotion1", 0)
+            dilation1 = profile.get("dilation1", 0)
+            erotion2  = profile.get("erotion2", 0)
+            dilation2 = profile.get("dilation2", 0)
 
             if erotion1 > 0:
                 self.cboxErode.setChecked(True)
@@ -486,15 +610,25 @@ class MainWindow(QMainWindow):
                 self.sliderDilation2.setValue(1)
 
             ################################################
-            trim_header = settings.get("trim_header", 0)
+            trim_header = profile.get("trim_header", 0)
             self.sliderTrimHeader.setValue(trim_header)
             self.cboxTrimHeader.setChecked(trim_header > 0)
 
-            trim_footer = settings.get("trim_footer", self.sliderTrimFooter.maximum())
+            trim_footer = profile.get("trim_footer", self.sliderTrimFooter.maximum())
             if trim_footer > self.sliderTrimFooter.maximum():
                 self.sliderTrimFooter.setMaximum(trim_footer)
             self.sliderTrimFooter.setValue(trim_footer)
             self.cboxTrimFooter.setChecked(trim_footer < self.sliderTrimFooter.maximum())
+
+            trim_left = profile.get("trim_left", 0)
+            self.sliderTrimLeft.setValue(trim_left)
+            self.cboxTrimLeft.setChecked(trim_left > 0)
+
+            trim_right = profile.get("trim_right", self.sliderTrimRight.maximum())
+            if trim_right > self.sliderTrimRight.maximum():
+                self.sliderTrimRight.setMaximum(trim_right)
+            self.sliderTrimRight.setValue(trim_right)
+            self.cboxTrimRight.setChecked(trim_right < self.sliderTrimRight.maximum())
             ################################################
 
             self.refreshAllImg()
@@ -504,23 +638,70 @@ class MainWindow(QMainWindow):
             raise
 
 
-    def saveSettings(self):
-        settings = {
+    def snapshotCurrentProfile(self):
+        return {
             "lower_hsv"  : list(self.lowerHSV),
             "upper_hsv"  : list(self.upperHSV),
-            "erotion1"   : self.sliderErotion.value()   if self.cboxErode.isChecked()     else 0,
-            "dilation1"  : self.sliderDilation.value()  if self.cboxDilate.isChecked()    else 0,
-            "erotion2"   : self.sliderErotion2.value()  if self.cboxErode2.isChecked()    else 0,
-            "dilation2"  : self.sliderDilation2.value() if self.cboxDilate2.isChecked()   else 0,
+            "erotion1"   : self.sliderErotion.value()    if self.cboxErode.isChecked()      else 0,
+            "dilation1"  : self.sliderDilation.value()   if self.cboxDilate.isChecked()     else 0,
+            "erotion2"   : self.sliderErotion2.value()   if self.cboxErode2.isChecked()     else 0,
+            "dilation2"  : self.sliderDilation2.value()  if self.cboxDilate2.isChecked()    else 0,
             "trim_header": self.sliderTrimHeader.value() if self.cboxTrimHeader.isChecked() else 0,
             "trim_footer": self.sliderTrimFooter.value() if self.cboxTrimFooter.isChecked() else self.sliderTrimFooter.maximum(),
+            "trim_left"  : self.sliderTrimLeft.value()   if self.cboxTrimLeft.isChecked()   else 0,
+            "trim_right" : self.sliderTrimRight.value()  if self.cboxTrimRight.isChecked()  else self.sliderTrimRight.maximum(),
         }
+
+
+    def saveSettings(self):
+        self.settings["default"] = self.snapshotCurrentProfile()
 
         try:
             with open("HsvRangeTool.json", "w") as fp:
-                json.dump(settings, fp)
+                json.dump(self.settings, fp)
         except BaseException as e:
             print("Unable to save settings to HsvRangeTool.json: " + repr(e))
+
+
+    def onActivateProfile(self):
+        profile = self.cboxProfile.currentText()
+        if profile not in ("", "default"):
+            if profile in self.settings:
+                self.syncProfile(self.settings.get(profile, {}))
+            else:
+                self.settings[profile] = self.snapshotCurrentProfile()
+
+        self.cboxProfile.clearFocus()
+
+
+    def onSnapshotProfile(self):
+        profile = self.cboxProfile.currentText()
+
+        if profile in ("", "default"):
+            self.cboxProfile.clearEditText()
+        else:
+            ndx = self.cboxProfile.findText(profile, Qt.MatchExactly)
+
+            if ndx < 0:
+                self.cboxProfile.insertItem(0, profile)
+                self.cboxProfile.setCurrentIndex(0)
+
+            self.settings[profile] = self.snapshotCurrentProfile()
+
+
+    def onDeleteProfile(self):
+        ndx = self.cboxProfile.currentIndex()
+        if ndx >= 0:
+            profile = self.cboxProfile.currentText()
+            self.cboxProfile.setCurrentIndex(-1)
+            self.cboxProfile.removeItem(ndx)
+
+            if profile not in ("", "default") and profile in self.settings:
+                del self.settings[profile]
+
+
+    def onResetProfile(self):
+        self.syncProfile({})
 
 
 if __name__ == "__main__":
