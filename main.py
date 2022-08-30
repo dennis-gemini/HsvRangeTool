@@ -658,7 +658,7 @@ class MainWindow(QMainWindow):
 
         try:
             with open("HsvRangeTool.json", "w") as fp:
-                json.dump(self.settings, fp)
+                json.dump(self.settings, fp, indent=4)
         except BaseException as e:
             print("Unable to save settings to HsvRangeTool.json: " + repr(e))
 
