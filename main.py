@@ -86,14 +86,15 @@ class MainWindow(QMainWindow):
         self.btnOpen = self.findChild(QPushButton, "btnOpen")
         self.btnCopy = self.findChild(QPushButton, "btnCopy")
 
-        self.btnFirst    = self.findChild(QPushButton, "btnFirst")
-        self.btnPrev     = self.findChild(QPushButton, "btnPrev")
-        self.btnNext     = self.findChild(QPushButton, "btnNext")
-        self.btnLast     = self.findChild(QPushButton, "btnLast")
-        self.lblFileName = self.findChild(QLabel,      "lblFileName")
+        self.btnFirst      = self.findChild(QPushButton, "btnFirst")
+        self.btnPrev       = self.findChild(QPushButton, "btnPrev")
+        self.btnNext       = self.findChild(QPushButton, "btnNext")
+        self.btnLast       = self.findChild(QPushButton, "btnLast")
+        self.lblFileName   = self.findChild(QLabel,      "lblFileName")
+        self.lblFolderName = self.findChild(QLabel,      "lblFolderName")
 
-        self.btnLoad     = self.findChild(QPushButton, "btnLoad")
-        self.btnSave     = self.findChild(QPushButton, "btnSave")
+        self.btnLoad       = self.findChild(QPushButton, "btnLoad")
+        self.btnSave       = self.findChild(QPushButton, "btnSave")
 
         self.init_handler()
         self.loadHsvSpace()
@@ -372,7 +373,8 @@ class MainWindow(QMainWindow):
     def _loadImageFile(self, fileName):
         self.updateRawImg(cv2.imread(fileName))
         self.fileName = fileName
-        self.lblFileName.setText(os.path.join(os.path.basename(os.path.dirname(fileName)), os.path.basename(fileName)))
+        self.lblFileName.setText(os.path.basename(fileName))
+        self.lblFolderName.setText(os.path.basename(os.path.dirname(fileName)))
 
     def onBtnOpenClicked(self):
         options = QFileDialog.Options()
