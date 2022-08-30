@@ -46,7 +46,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>0</string>
+              <string>QT5 (359) | cv2 (179)</string>
              </property>
             </widget>
            </item>
@@ -299,6 +299,9 @@
              <property name="minimum">
               <number>1</number>
              </property>
+             <property name="maximum">
+              <number>200</number>
+             </property>
              <property name="singleStep">
               <number>2</number>
              </property>
@@ -323,6 +326,9 @@
             <widget class="QSlider" name="sliderDilation">
              <property name="minimum">
               <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>200</number>
              </property>
              <property name="singleStep">
               <number>2</number>
@@ -352,6 +358,9 @@
              <property name="minimum">
               <number>1</number>
              </property>
+             <property name="maximum">
+              <number>200</number>
+             </property>
              <property name="singleStep">
               <number>2</number>
              </property>
@@ -376,6 +385,9 @@
             <widget class="QSlider" name="sliderDilation2">
              <property name="minimum">
               <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>200</number>
              </property>
              <property name="singleStep">
               <number>2</number>
@@ -403,20 +415,20 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>Cut Header/Footer</string>
+         <string>Trim Header/Footer</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_14">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_13">
            <item>
-            <widget class="QCheckBox" name="cboxCutHeader">
+            <widget class="QCheckBox" name="cboxTrimHeader">
              <property name="text">
-              <string>Cut Header</string>
+              <string>Trim Header</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sliderCutHeader">
+            <widget class="QSlider" name="sliderTrimHeader">
              <property name="minimum">
               <number>0</number>
              </property>
@@ -437,14 +449,14 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_14">
            <item>
-            <widget class="QCheckBox" name="cboxCutFooter">
+            <widget class="QCheckBox" name="cboxTrimFooter">
              <property name="text">
-              <string>Cut Footer</string>
+              <string>Trim Footer</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sliderCutFooter">
+            <widget class="QSlider" name="sliderTrimFooter">
              <property name="minimum">
               <number>0</number>
              </property>
@@ -524,11 +536,29 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QPushButton" name="btnCopy">
-          <property name="text">
-           <string>Print Upper Lower</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QPushButton" name="btnCopy">
+            <property name="text">
+             <string>Print</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnLoad">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSave">
+            <property name="text">
+             <string>Save</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="2" column="1">
          <widget class="QComboBox" name="cboxSetMode">
