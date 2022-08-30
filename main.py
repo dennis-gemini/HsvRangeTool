@@ -100,6 +100,8 @@ class MainWindow(QMainWindow):
         self.updateHSVPreview()
         self.loadSettings()
 
+    def resizeEvent(self, event):
+        self.refreshAllImg()
 
     def loadHsvSpace(self):
         self.imgHsvSpace = cv2.imread(os.path.join(os.path.dirname(__file__), "assets", "hsv_color.png"))
