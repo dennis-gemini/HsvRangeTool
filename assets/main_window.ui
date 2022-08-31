@@ -29,52 +29,81 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>Hue</string>
+         <string>HSV Selection</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <property name="topMargin">
-            <number>0</number>
-           </property>
+        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,1,0">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+
+         <item row="0" column="0">
+          <widget class="QComboBox" name="cboxSetMode">
            <item>
-            <widget class="QLabel" name="lblH">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+            <property name="text">
+             <string>Upper HSV</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Lower HSV</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_10">
              <property name="text">
-              <string>QT5 (359) | cv2 (179)</string>
+              <string>Lower:</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QLabel" name="previewH">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
+           <item row="0" column="1">
+            <widget class="QLabel" name="lblLower">
              <property name="text">
-              <string/>
+              <string>0, 0, 0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string>Upper:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="lblUpper">
+             <property name="text">
+              <string>179, 255, 255</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
-         <item>
+
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_0">
+           <property name="text">
+            <string>Hue</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="lblH">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>179</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
           <widget class="QSlider" name="sliderH">
            <property name="maximum">
             <number>359</number>
@@ -87,13 +116,19 @@
            </property>
           </widget>
          </item>
-         <!--<item>
-          <widget class="QLabel" name="label_5">
+         <item row="1" column="3">
+          <widget class="QLabel" name="previewH">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
            </property>
            <property name="frameShape">
             <enum>QFrame::Box</enum>
@@ -102,59 +137,29 @@
             <string/>
            </property>
           </widget>
-         </item>-->
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="title">
-         <string>Saturation</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="lblS">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>255</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="previewS">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
-         <item>
+
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_1">
+           <property name="text">
+            <string>Saturation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="lblS">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>255</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
           <widget class="QSlider" name="sliderS">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -173,13 +178,19 @@
            </property>
           </widget>
          </item>
-         <!--<item>
-          <widget class="QLabel" name="label_6">
+         <item row="2" column="3">
+          <widget class="QLabel" name="previewS">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
            </property>
            <property name="frameShape">
             <enum>QFrame::Box</enum>
@@ -188,59 +199,29 @@
             <string/>
            </property>
           </widget>
-         </item>-->
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="title">
-         <string>Value</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="lblV">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>255</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="previewV">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
-         <item>
+
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="lblV">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>255</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
           <widget class="QSlider" name="sliderV">
            <property name="maximum">
             <number>255</number>
@@ -253,13 +234,19 @@
            </property>
           </widget>
          </item>
-         <!--<item>
-          <widget class="QLabel" name="label_8">
+         <item row="3" column="3">
+          <widget class="QLabel" name="previewV">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
            </property>
            <property name="frameShape">
             <enum>QFrame::Box</enum>
@@ -268,7 +255,15 @@
             <string/>
            </property>
           </widget>
-         </item>-->
+         </item>
+
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="cboxInverse">
+           <property name="text">
+            <string>Inversed</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -282,7 +277,7 @@
          </sizepolicy>
         </property>
         <property name="title">
-         <string>Erosion/Dilation</string>
+         <string>Noise Deduction</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_9">
          <item>
@@ -295,7 +290,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sliderErotion">
+            <widget class="QSlider" name="sliderErosion">
              <property name="minimum">
               <number>1</number>
              </property>
@@ -354,7 +349,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="sliderErotion2">
+            <widget class="QSlider" name="sliderErosion2">
              <property name="minimum">
               <number>1</number>
              </property>
@@ -520,223 +515,217 @@
       </item>
 
       <item>
-       <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
-        <property name="topMargin">
-         <number>0</number>
+       <widget class="QGroupBox" name="groupBox_9">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <item row="1" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
-          <item>
-           <widget class="QPushButton" name="btnOpen">
-            <property name="text">
-             <string>Open</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnFirst">
-            <property name="text">
-             <string>|&lt;&lt;</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnPrev">
-            <property name="text">
-             <string>&lt;</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnNext">
-            <property name="text">
-             <string>&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnLast">
-            <property name="text">
-             <string>&gt;&gt;|</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="4" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Profile</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cboxProfile">
-            <property name="insertPolicy">
-             <enum>QComboBox::InsertAtTop</enum>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToContents</enum>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnSnapshotProfile">
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>+</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnDeleteProfile">
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>-</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnResetProfile">
-            <property name="text">
-             <string>Reset</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
-          <item>
-           <widget class="QPushButton" name="btnCopy">
-            <property name="text">
-             <string>Print</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnLoad">
-            <property name="text">
-             <string>Load</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnSave">
-            <property name="text">
-             <string>Save</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="cboxSetMode">
-          <item>
+        <property name="title">
+         <string>Profile Management</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_18">
+         <item>
+          <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Upper HSV</string>
+            <string>Name</string>
            </property>
-          </item>
-          <item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cboxProfile">
+           <property name="insertPolicy">
+            <enum>QComboBox::InsertAtTop</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnSnapshotProfile">
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
            <property name="text">
-            <string>Lower HSV</string>
+            <string>+</string>
            </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_15">
-          <item>
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Folder:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblFolderName">
-            <property name="alignment">
-             <enum>Qt::AlignRight</enum>
-            </property>
-            <property name="text">
-             <string></string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="3" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_16">
-          <item>
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>File:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblFileName">
-            <property name="alignment">
-             <enum>Qt::AlignRight</enum>
-            </property>
-            <property name="text">
-             <string></string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="3" column="1">
-         <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Lower:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="lblLower">
-            <property name="text">
-             <string>0, 0, 0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Upper:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="lblUpper">
-            <property name="text">
-             <string>179, 255, 255</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnDeleteProfile">
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>-</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnResetProfile">
+           <property name="text">
+            <string>Reset</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnCopy">
+           <property name="text">
+            <string>Print</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnLoad">
+           <property name="text">
+            <string>Load</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnSave">
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </item>
+
+      <item>
+       <widget class="QGroupBox" name="groupBox_9">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Image File Navigation</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_10">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QPushButton" name="btnOpen">
+             <property name="text">
+              <string>Open</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnFirst">
+             <property name="text">
+              <string>|&lt;&lt;</string>
+             </property>
+             <property name="toolTip">
+              <string>Hotkey: PgUp or Home</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnPrev">
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+             <property name="toolTip">
+              <string>Hotkey: Up or Left</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnNext">
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+             <property name="toolTip">
+              <string>Hotkey: Down or Right</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnLast">
+             <property name="text">
+              <string>&gt;&gt;|</string>
+             </property>
+             <property name="toolTip">
+              <string>Hotkey: PgDown or End</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="0,1,0">
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Folder:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cboxFolderName">
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnDropFolderName">
+             <property name="toolTip">
+              <string>Remove entry of folder access history</string>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>x</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_16" stretch="0,1">
+           <item>
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>File:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblFileName">
+             <property name="alignment">
+              <enum>Qt::AlignLeft</enum>
+             </property>
+             <property name="text">
+              <string></string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+
      </layout>
     </item>
+
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">

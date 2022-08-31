@@ -64,13 +64,14 @@ class MainWindow(QMainWindow):
         self.previewHsvSpace = self.findChild(QLabel, "previewHsvSpace")
 
         self.cboxSetMode = self.findChild(QComboBox, "cboxSetMode")
+        self.cboxInverse = self.findChild(QCheckBox, "cboxInverse")
 
         self.cboxErode        = self.findChild(QCheckBox, "cboxErode"      )
-        self.sliderErotion    = self.findChild(QSlider,   "sliderErotion"  )
+        self.sliderErosion    = self.findChild(QSlider,   "sliderErosion"  )
         self.cboxDilate       = self.findChild(QCheckBox, "cboxDilate"     )
         self.sliderDilation   = self.findChild(QSlider,   "sliderDilation" )
         self.cboxErode2       = self.findChild(QCheckBox, "cboxErode2"     )
-        self.sliderErotion2   = self.findChild(QSlider,   "sliderErotion2" )
+        self.sliderErosion2   = self.findChild(QSlider,   "sliderErosion2" )
         self.cboxDilate2      = self.findChild(QCheckBox, "cboxDilate2"    )
         self.sliderDilation2  = self.findChild(QSlider,   "sliderDilation2")
 
@@ -100,7 +101,8 @@ class MainWindow(QMainWindow):
         self.btnNext            = self.findChild(QPushButton, "btnNext")
         self.btnLast            = self.findChild(QPushButton, "btnLast")
         self.lblFileName        = self.findChild(QLabel,      "lblFileName")
-        self.lblFolderName      = self.findChild(QLabel,      "lblFolderName")
+        self.cboxFolderName     = self.findChild(QComboBox,   "cboxFolderName")
+        self.btnDropFolderName  = self.findChild(QPushButton, "btnDropFolderName")
 
         self.btnLoad            = self.findChild(QPushButton, "btnLoad")
         self.btnSave            = self.findChild(QPushButton, "btnSave")
@@ -126,6 +128,7 @@ class MainWindow(QMainWindow):
         self.sliderS.valueChanged.connect(self.onSChanged)
         self.sliderV.valueChanged.connect(self.onVChanged)
         self.cboxSetMode.currentTextChanged.connect(self.onCBoxModeChanged)
+        self.cboxInverse.stateChanged.connect(self.updateMask)
         self.btnOpen.clicked.connect(self.onBtnOpenClicked)
         self.btnCopy.clicked.connect(self.onBtnCopyClicked)
 
@@ -133,6 +136,8 @@ class MainWindow(QMainWindow):
         self.btnPrev.clicked.connect(self.onBtnPrevClicked)
         self.btnNext.clicked.connect(self.onBtnNextClicked)
         self.btnLast.clicked.connect(self.onBtnLastClicked)
+        self.cboxFolderName.textActivated.connect(self.onChangeFolder)
+        self.btnDropFolderName.clicked.connect(self.onBtnDropFolderName)
 
         self.btnLoad.clicked.connect(self.loadSettings)
         self.btnSave.clicked.connect(self.saveSettings)
@@ -141,18 +146,18 @@ class MainWindow(QMainWindow):
         self.keyDown   = QShortcut(QKeySequence("Down"  ), self); self.keyDown.activated.connect(self.onBtnNextClicked)
         self.keyLeft   = QShortcut(QKeySequence("Left"  ), self); self.keyLeft.activated.connect(self.onBtnPrevClicked)
         self.keyRight  = QShortcut(QKeySequence("Right" ), self); self.keyRight.activated.connect(self.onBtnNextClicked)
-        self.keyPgUp   = QShortcut(QKeySequence("PgUp"  ), self); self.keyPgUp.activated.connect(self.onBtnPrevClicked)
-        self.keyPgDown = QShortcut(QKeySequence("PgDown"), self); self.keyPgDown.activated.connect(self.onBtnNextClicked)
+        self.keyPgUp   = QShortcut(QKeySequence("PgUp"  ), self); self.keyPgUp.activated.connect(self.onBtnFirstClicked)
+        self.keyPgDown = QShortcut(QKeySequence("PgDown"), self); self.keyPgDown.activated.connect(self.onBtnLastClicked)
         self.keyHome   = QShortcut(QKeySequence("Home"  ), self); self.keyHome.activated.connect(self.onBtnFirstClicked)
         self.keyEnd    = QShortcut(QKeySequence("End"   ), self); self.keyEnd.activated.connect(self.onBtnLastClicked)
 
         self.cboxDilate.stateChanged.connect(self.updateMask)
         self.cboxErode.stateChanged.connect(self.updateMask)
-        self.sliderErotion.valueChanged.connect(self.onSliderErodeChanged)
+        self.sliderErosion.valueChanged.connect(self.onSliderErodeChanged)
         self.sliderDilation.valueChanged.connect(self.onSliderDilateChanged)
         self.cboxDilate2.stateChanged.connect(self.updateMask)
         self.cboxErode2.stateChanged.connect(self.updateMask)
-        self.sliderErotion2.valueChanged.connect(self.onSliderErode2Changed)
+        self.sliderErosion2.valueChanged.connect(self.onSliderErode2Changed)
         self.sliderDilation2.valueChanged.connect(self.onSliderDilate2Changed)
 
         self.cboxTrimHeader.stateChanged.connect(self.updateMask)
@@ -174,12 +179,15 @@ class MainWindow(QMainWindow):
         print("Lower HSV: ", self.lowerHSV)
         print("Upper HSV: ", self.upperHSV)
 
+        if self.cboxInverse.isChecked():
+            print("Inversed: yes")
+
         if self.cboxErode.isChecked():
-            print("Erode1: ", self.sliderErotion.value())
+            print("Erode1: ", self.sliderErosion.value())
         if self.cboxDilate.isChecked():
             print("Dilate1: ", self.sliderDilation.value())
         if self.cboxErode2.isChecked():
-            print("Erode2: ", self.sliderErotion2.value())
+            print("Erode2: ", self.sliderErosion2.value())
         if self.cboxDilate2.isChecked():
             print("Dilate2: ", self.sliderDilation2.value())
 
@@ -199,12 +207,10 @@ class MainWindow(QMainWindow):
             return
 
         frame_HSV = cv2.cvtColor(self.imgHsvSpace, cv2.COLOR_BGR2HSV)
-        lower_orange = np.array(self.lowerHSV)
-        upper_orange = np.array(self.upperHSV)
+        lower_range = np.array(self.lowerHSV)
+        upper_range = np.array(self.upperHSV)
 
-        frame_threshold = cv2.inRange(
-            frame_HSV, lower_orange, upper_orange)
-
+        frame_threshold = cv2.inRange(frame_HSV, lower_range, upper_range)
         frame_threshold = cv2.bitwise_and(self.imgHsvSpace, self.imgHsvSpace, mask=frame_threshold)
 
         _asQImage = QImage(
@@ -286,14 +292,16 @@ class MainWindow(QMainWindow):
             return
 
         frame_HSV = cv2.cvtColor(self.imgRaw, cv2.COLOR_BGR2HSV)
-        lower_orange = np.array(self.lowerHSV)
-        upper_orange = np.array(self.upperHSV)
+        lower_range = np.array(self.lowerHSV)
+        upper_range = np.array(self.upperHSV)
 
-        frame_threshold = cv2.inRange(
-            frame_HSV, lower_orange, upper_orange)
+        frame_threshold = cv2.inRange(frame_HSV, lower_range, upper_range)
+
+        if self.cboxInverse.isChecked():
+            frame_threshold = cv2.bitwise_not(frame_threshold, frame_threshold)
 
         if self.cboxErode.isChecked():
-            _kernel = self.sliderErotion.value()
+            _kernel = self.sliderErosion.value()
             frame_threshold = cv2.erode(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
         
         if self.cboxDilate.isChecked():
@@ -301,7 +309,7 @@ class MainWindow(QMainWindow):
             frame_threshold = cv2.dilate(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
 
         if self.cboxErode2.isChecked():
-            _kernel = self.sliderErotion2.value()
+            _kernel = self.sliderErosion2.value()
             frame_threshold = cv2.erode(frame_threshold, np.ones((_kernel, _kernel), dtype=np.uint8))
         
         if self.cboxDilate2.isChecked():
@@ -378,7 +386,7 @@ class MainWindow(QMainWindow):
 
     def onHChanged(self):
         _v = self.selectedHue = self.sliderH.value()
-        self.lblH.setText(str(f"QT5 ({_v}) | cv2 ({_v//2})"))
+        self.lblH.setText(str(f"{_v//2}"))
         self.updateHSVPreview()
 
     def onSChanged(self):
@@ -391,15 +399,17 @@ class MainWindow(QMainWindow):
         self.lblV.setText(str(_v))
         self.updateHSVPreview()
 
-    def onSliderErodeChanged(self):
-        self.cboxErode.setText(f"Erode {self.sliderErotion.value()}")
 
-        if self.sliderErotion.value() > 1 and not self.cboxErode.isChecked():
+    def onSliderErodeChanged(self):
+        self.cboxErode.setText(f"Erode {self.sliderErosion.value()}")
+
+        if self.sliderErosion.value() > 1 and not self.cboxErode.isChecked():
             self.cboxErode.setChecked(True)
-        elif self.sliderErotion.value() <= 1 and self.cboxErode.isChecked():
+        elif self.sliderErosion.value() <= 1 and self.cboxErode.isChecked():
             self.cboxErode.setChecked(False)
 
         self.updateMask()
+
 
     def onSliderDilateChanged(self):
         self.cboxDilate.setText(f"Dilate {self.sliderDilation.value()}")
@@ -411,15 +421,17 @@ class MainWindow(QMainWindow):
 
         self.updateMask()
 
-    def onSliderErode2Changed(self):
-        self.cboxErode2.setText(f"Erode {self.sliderErotion2.value()}")
 
-        if self.sliderErotion2.value() > 1 and not self.cboxErode2.isChecked():
+    def onSliderErode2Changed(self):
+        self.cboxErode2.setText(f"Erode {self.sliderErosion2.value()}")
+
+        if self.sliderErosion2.value() > 1 and not self.cboxErode2.isChecked():
             self.cboxErode2.setChecked(True)
-        elif self.sliderErotion2.value() <= 1 and self.cboxErode2.isChecked():
+        elif self.sliderErosion2.value() <= 1 and self.cboxErode2.isChecked():
             self.cboxErode2.setChecked(False)
 
         self.updateMask()
+
 
     def onSliderDilate2Changed(self):
         self.cboxDilate2.setText(f"Dilate {self.sliderDilation2.value()}")
@@ -431,6 +443,7 @@ class MainWindow(QMainWindow):
 
         self.updateMask()
 
+
     def onSliderTrimHeaderChanged(self):
         self.cboxTrimHeader.setText(f"Trim Header {self.sliderTrimHeader.value()}")
 
@@ -440,6 +453,7 @@ class MainWindow(QMainWindow):
             self.cboxTrimHeader.setChecked(False)
 
         self.updateMask()
+
 
     def onSliderTrimFooterChanged(self):
         self.cboxTrimFooter.setText(f"Trim Footer {self.sliderTrimFooter.value()}")
@@ -451,6 +465,7 @@ class MainWindow(QMainWindow):
 
         self.updateMask()
 
+
     def onSliderTrimLeftChanged(self):
         self.cboxTrimLeft.setText(f"Trim Left {self.sliderTrimLeft.value()}")
 
@@ -460,6 +475,7 @@ class MainWindow(QMainWindow):
             self.cboxTrimLeft.setChecked(False)
 
         self.updateMask()
+
 
     def onSliderTrimRightChanged(self):
         self.cboxTrimRight.setText(f"Trim Right {self.sliderTrimRight.value()}")
@@ -471,11 +487,36 @@ class MainWindow(QMainWindow):
 
         self.updateMask()
 
+
     def _loadImageFile(self, fileName):
         self.updateRawImg(cv2.imread(fileName))
         self.fileName = fileName
         self.lblFileName.setText(os.path.basename(fileName))
-        self.lblFolderName.setText(os.path.basename(os.path.dirname(fileName)))
+
+        path = os.path.dirname(fileName)
+
+        for ndx in range(self.cboxFolderName.count()):
+            if self.cboxFolderName.itemData(ndx) == path:
+                self.cboxFolderName.setCurrentIndex(ndx)
+                return
+
+        folderName = os.path.basename(path)
+        ndx = self.cboxFolderName.findText(folderName, Qt.MatchExactly)
+
+        dup = 0
+        while ndx >= 0:
+            dup += 1
+            ndx = self.cboxFolderName.findText(f"{folderName}({dup})", Qt.MatchExactly)
+
+        if dup > 0:
+            folderName = f"{folderName}({dup})"
+
+        self.cboxFolderName.insertItem(0, folderName, path)
+        self.cboxFolderName.setCurrentIndex(0)
+
+        while self.cboxFolderName.count() > 20:
+            self.cboxFolderName.removeItem(self.cboxFolderName.count() - 1)
+
 
     def onBtnOpenClicked(self):
         options = QFileDialog.Options()
@@ -490,12 +531,14 @@ class MainWindow(QMainWindow):
         # with open(fileName, 'rb') as f:
         #     self.updateRawImg(QImage.fromData(f.read()))
 
+
     def onBtnFirstClicked(self):
         if self.fileName:
             files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
 
             if len(files) > 0:
                 self._loadImageFile(files[0])
+
 
     def onBtnPrevClicked(self):
         if self.fileName:
@@ -507,6 +550,7 @@ class MainWindow(QMainWindow):
                         self._loadImageFile(files[i - 1])
                     return
 
+
     def onBtnNextClicked(self):
         if self.fileName:
             files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
@@ -517,12 +561,29 @@ class MainWindow(QMainWindow):
                         self._loadImageFile(files[i + 1])
                     return
 
+
     def onBtnLastClicked(self):
         if self.fileName:
             files = sorted(glob(os.path.join(os.path.dirname(self.fileName), "*.jp*g")))
 
             if len(files) > 0:
                 self._loadImageFile(files[-1])
+
+
+    def onChangeFolder(self):
+        ndx = self.cboxFolderName.currentIndex()
+        if ndx >= 0:
+            path = self.cboxFolderName.itemData(ndx)
+            files = sorted(glob(os.path.join(path, "*.jp*g")))
+
+            if len(files) > 0:
+                self._loadImageFile(files[0])
+
+
+    def onBtnDropFolderName(self):
+        ndx = self.cboxFolderName.currentIndex()
+        if ndx >= 0:
+            self.cboxFolderName.removeItem(ndx)
 
 
     def loadSettings(self):
@@ -534,10 +595,15 @@ class MainWindow(QMainWindow):
             print("Unable to load settings from HsvRangeTool.json: " + repr(e))
             return
 
-        self.syncProfile(self.settings.get("default", {}))
+        if "profile" not in self.settings:
+            self.settings["profile"] = {}
+        if "folders" not in self.settings:
+            self.settings["folders"] = []
+
+        self.syncProfile(self.settings["profile"].get("default", {}))
 
         found = False
-        for profile in self.settings:
+        for profile in self.settings["profile"]:
             if profile in ("", "default"):
                 continue
 
@@ -546,14 +612,29 @@ class MainWindow(QMainWindow):
                 self.cboxProfile.insertItem(0, profile)
                 ndx = 0
 
-            if self.settings[profile] == self.settings["default"]:
+            if self.settings["profile"][profile] == self.settings["profile"].get("default", {}):
                 found = True
                 self.cboxProfile.setCurrentIndex(ndx)
 
         if not found:
             self.cboxProfile.setCurrentIndex(-1)
 
-        self.cboxProfile.clearFocus()
+        self.cboxFolderName.clear()
+        for path in reversed(self.settings["folders"][:20]):
+            folderName = os.path.basename(path)
+            ndx = self.cboxFolderName.findText(folderName, Qt.MatchExactly)
+
+            dup = 0
+            while ndx >= 0:
+                dup += 1
+                ndx = self.cboxFolderName.findText(f"{folderName}({dup})", Qt.MatchExactly)
+
+            if dup > 0:
+                folderName = f"{folderName}({dup})"
+
+            self.cboxFolderName.insertItem(0, folderName, path)
+
+        self.cboxFolderName.setCurrentIndex(-1)
 
 
     def syncProfile(self, profile):
@@ -561,6 +642,7 @@ class MainWindow(QMainWindow):
             ################################################
             self.upperHSV = tuple(profile.get("upper_hsv", [179, 255, 255]))
             self.lowerHSV = tuple(profile.get("lower_hsv", [0, 0, 0]))
+            self.cboxInverse.setChecked(profile.get("inversed", False))
 
             if self.cboxSetMode.currentIndex() == 0:
                 self.selectedHue        = self.upperHSV[0] * 2
@@ -576,17 +658,17 @@ class MainWindow(QMainWindow):
             self.sliderV.setValue(self.selectedValue)
 
             ################################################
-            erotion1  = profile.get("erotion1", 0)
+            erosion1  = profile.get("erosion1", 0)
             dilation1 = profile.get("dilation1", 0)
-            erotion2  = profile.get("erotion2", 0)
+            erosion2  = profile.get("erosion2", 0)
             dilation2 = profile.get("dilation2", 0)
 
-            if erotion1 > 0:
+            if erosion1 > 0:
                 self.cboxErode.setChecked(True)
-                self.sliderErotion.setValue(erotion1)
+                self.sliderErosion.setValue(erosion1)
             else:
                 self.cboxErode.setChecked(False)
-                self.sliderErotion.setValue(1)
+                self.sliderErosion.setValue(1)
 
             if dilation1 > 0:
                 self.cboxDilate.setChecked(True)
@@ -595,12 +677,12 @@ class MainWindow(QMainWindow):
                 self.cboxDilate.setChecked(False)
                 self.sliderDilation.setValue(1)
 
-            if erotion2 > 0:
+            if erosion2 > 0:
                 self.cboxErode2.setChecked(True)
-                self.sliderErotion2.setValue(erotion2)
+                self.sliderErosion2.setValue(erosion2)
             else:
                 self.cboxErode2.setChecked(False)
-                self.sliderErotion2.setValue(1)
+                self.sliderErosion2.setValue(1)
 
             if dilation2 > 0:
                 self.cboxDilate2.setChecked(True)
@@ -642,9 +724,10 @@ class MainWindow(QMainWindow):
         return {
             "lower_hsv"  : list(self.lowerHSV),
             "upper_hsv"  : list(self.upperHSV),
-            "erotion1"   : self.sliderErotion.value()    if self.cboxErode.isChecked()      else 0,
+            "inversed"   : self.cboxInverse.isChecked(),
+            "erosion1"   : self.sliderErosion.value()    if self.cboxErode.isChecked()      else 0,
             "dilation1"  : self.sliderDilation.value()   if self.cboxDilate.isChecked()     else 0,
-            "erotion2"   : self.sliderErotion2.value()   if self.cboxErode2.isChecked()     else 0,
+            "erosion2"   : self.sliderErosion2.value()   if self.cboxErode2.isChecked()     else 0,
             "dilation2"  : self.sliderDilation2.value()  if self.cboxDilate2.isChecked()    else 0,
             "trim_header": self.sliderTrimHeader.value() if self.cboxTrimHeader.isChecked() else 0,
             "trim_footer": self.sliderTrimFooter.value() if self.cboxTrimFooter.isChecked() else self.sliderTrimFooter.maximum(),
@@ -654,7 +737,12 @@ class MainWindow(QMainWindow):
 
 
     def saveSettings(self):
-        self.settings["default"] = self.snapshotCurrentProfile()
+        self.settings["profile"]["default"] = self.snapshotCurrentProfile()
+        self.settings["folders"] = []
+
+        for ndx in range(self.cboxFolderName.count()):
+            path = self.cboxFolderName.itemData(ndx)
+            self.settings["folders"].append(path)
 
         try:
             with open("HsvRangeTool.json", "w") as fp:
@@ -666,12 +754,10 @@ class MainWindow(QMainWindow):
     def onActivateProfile(self):
         profile = self.cboxProfile.currentText()
         if profile not in ("", "default"):
-            if profile in self.settings:
-                self.syncProfile(self.settings.get(profile, {}))
+            if profile in self.settings["profile"]:
+                self.syncProfile(self.settings["profile"].get(profile, {}))
             else:
-                self.settings[profile] = self.snapshotCurrentProfile()
-
-        self.cboxProfile.clearFocus()
+                self.settings["profile"][profile] = self.snapshotCurrentProfile()
 
 
     def onSnapshotProfile(self):
@@ -686,7 +772,7 @@ class MainWindow(QMainWindow):
                 self.cboxProfile.insertItem(0, profile)
                 self.cboxProfile.setCurrentIndex(0)
 
-            self.settings[profile] = self.snapshotCurrentProfile()
+            self.settings["profile"][profile] = self.snapshotCurrentProfile()
 
 
     def onDeleteProfile(self):
@@ -696,8 +782,8 @@ class MainWindow(QMainWindow):
             self.cboxProfile.setCurrentIndex(-1)
             self.cboxProfile.removeItem(ndx)
 
-            if profile not in ("", "default") and profile in self.settings:
-                del self.settings[profile]
+            if profile not in ("", "default") and profile in self.settings["profile"]:
+                del self.settings["profile"][profile]
 
 
     def onResetProfile(self):
