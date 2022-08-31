@@ -63,8 +63,9 @@ class MainWindow(QMainWindow):
         self.previewMaskedRaw = self.findChild(QLabel, "previewMaskedRaw")
         self.previewHsvSpace = self.findChild(QLabel, "previewHsvSpace")
 
-        self.cboxSetMode = self.findChild(QComboBox, "cboxSetMode")
-        self.cboxInverse = self.findChild(QCheckBox, "cboxInverse")
+        self.cboxSetMode      = self.findChild(QComboBox, "cboxSetMode")
+        self.cboxInverseHSV   = self.findChild(QCheckBox, "cboxInverseHSV")
+        self.cboxInverseMask  = self.findChild(QCheckBox, "cboxInverseMask")
 
         self.cboxErode        = self.findChild(QCheckBox, "cboxErode"      )
         self.sliderErosion    = self.findChild(QSlider,   "sliderErosion"  )
@@ -128,7 +129,8 @@ class MainWindow(QMainWindow):
         self.sliderS.valueChanged.connect(self.onSChanged)
         self.sliderV.valueChanged.connect(self.onVChanged)
         self.cboxSetMode.currentTextChanged.connect(self.onCBoxModeChanged)
-        self.cboxInverse.stateChanged.connect(self.updateMask)
+        self.cboxInverseHSV.stateChanged.connect(self.updateMask)
+        self.cboxInverseMask.stateChanged.connect(self.updateMask)
         self.btnOpen.clicked.connect(self.onBtnOpenClicked)
         self.btnCopy.clicked.connect(self.onBtnCopyClicked)
 
@@ -179,17 +181,17 @@ class MainWindow(QMainWindow):
         print("Lower HSV: ", self.lowerHSV)
         print("Upper HSV: ", self.upperHSV)
 
-        if self.cboxInverse.isChecked():
-            print("Inversed: yes")
+        if self.cboxInverseHSV.isChecked():
+            print("Inverse HSV Selection: yes")
 
         if self.cboxErode.isChecked():
-            print("Erode1: ", self.sliderErosion.value())
+            print("Erode: ", self.sliderErosion.value())
         if self.cboxDilate.isChecked():
-            print("Dilate1: ", self.sliderDilation.value())
+            print("Dilate: ", self.sliderDilation.value())
         if self.cboxErode2.isChecked():
-            print("Erode2: ", self.sliderErosion2.value())
+            print("Erode: ", self.sliderErosion2.value())
         if self.cboxDilate2.isChecked():
-            print("Dilate2: ", self.sliderDilation2.value())
+            print("Dilate: ", self.sliderDilation2.value())
 
         if self.cboxTrimHeader.isChecked() and self.sliderTrimHeader.value() > 0:
             print("Trim Header: ", self.sliderTrimHeader.value())
@@ -200,6 +202,8 @@ class MainWindow(QMainWindow):
         if self.cboxTrimRight.isChecked() and self.sliderTrimRight.value() < self.sliderTrimRight.maximum():
             print("Trim Right: ", self.sliderTrimRight.value())
 
+        if self.cboxInverseMask.isChecked():
+            print("Inverse Mask: yes")
 
     # =========== Helper ===========
     def updatePreviewHsvSpace(self):
@@ -297,7 +301,7 @@ class MainWindow(QMainWindow):
 
         frame_threshold = cv2.inRange(frame_HSV, lower_range, upper_range)
 
-        if self.cboxInverse.isChecked():
+        if self.cboxInverseHSV.isChecked():
             frame_threshold = cv2.bitwise_not(frame_threshold, frame_threshold)
 
         if self.cboxErode.isChecked():
@@ -332,13 +336,17 @@ class MainWindow(QMainWindow):
             _trim_right = self.sliderTrimRight.value()
             frame_threshold = cv2.rectangle(frame_threshold, (_trim_right, 0), (frame_threshold.shape[1], frame_threshold.shape[0]), False, -1)
 
+        if self.cboxInverseMask.isChecked():
+            frame_threshold = cv2.bitwise_not(frame_threshold, frame_threshold)
+
         self.updateMaskedRaw(frame_threshold)
         frame_threshold = cv2.cvtColor(frame_threshold, cv2.COLOR_GRAY2RGB)
 
         _asQImage = QImage(
             frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
-        self.previewMask.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMask.size().height()))
+        #self.previewMask.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMask.size().height()))
+        self.previewMask.setPixmap(QPixmap.fromImage(_asQImage).scaledToWidth(self.previewMask.size().width()))
 
 
     def updateMaskedRaw(self, masking):
@@ -361,7 +369,8 @@ class MainWindow(QMainWindow):
         _asQImage = QImage(
             frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
-        self.previewMaskedRaw.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMaskedRaw.size().height()))
+        #self.previewMaskedRaw.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMaskedRaw.size().height()))
+        self.previewMaskedRaw.setPixmap(QPixmap.fromImage(_asQImage).scaledToWidth(self.previewMaskedRaw.size().width()))
 
 
 
@@ -642,7 +651,7 @@ class MainWindow(QMainWindow):
             ################################################
             self.upperHSV = tuple(profile.get("upper_hsv", [179, 255, 255]))
             self.lowerHSV = tuple(profile.get("lower_hsv", [0, 0, 0]))
-            self.cboxInverse.setChecked(profile.get("inversed", False))
+            self.cboxInverseHSV.setChecked(profile.get("inverse_hsv", False))
 
             if self.cboxSetMode.currentIndex() == 0:
                 self.selectedHue        = self.upperHSV[0] * 2
@@ -711,6 +720,8 @@ class MainWindow(QMainWindow):
                 self.sliderTrimRight.setMaximum(trim_right)
             self.sliderTrimRight.setValue(trim_right)
             self.cboxTrimRight.setChecked(trim_right < self.sliderTrimRight.maximum())
+
+            self.cboxInverseMask.setChecked(profile.get("inverse_mask", False))
             ################################################
 
             self.refreshAllImg()
@@ -722,17 +733,18 @@ class MainWindow(QMainWindow):
 
     def snapshotCurrentProfile(self):
         return {
-            "lower_hsv"  : list(self.lowerHSV),
-            "upper_hsv"  : list(self.upperHSV),
-            "inversed"   : self.cboxInverse.isChecked(),
-            "erosion1"   : self.sliderErosion.value()    if self.cboxErode.isChecked()      else 0,
-            "dilation1"  : self.sliderDilation.value()   if self.cboxDilate.isChecked()     else 0,
-            "erosion2"   : self.sliderErosion2.value()   if self.cboxErode2.isChecked()     else 0,
-            "dilation2"  : self.sliderDilation2.value()  if self.cboxDilate2.isChecked()    else 0,
-            "trim_header": self.sliderTrimHeader.value() if self.cboxTrimHeader.isChecked() else 0,
-            "trim_footer": self.sliderTrimFooter.value() if self.cboxTrimFooter.isChecked() else self.sliderTrimFooter.maximum(),
-            "trim_left"  : self.sliderTrimLeft.value()   if self.cboxTrimLeft.isChecked()   else 0,
-            "trim_right" : self.sliderTrimRight.value()  if self.cboxTrimRight.isChecked()  else self.sliderTrimRight.maximum(),
+            "lower_hsv"     : list(self.lowerHSV),
+            "upper_hsv"     : list(self.upperHSV),
+            "inverse_hsv"   : self.cboxInverseHSV.isChecked(),
+            "erosion1"      : self.sliderErosion.value()    if self.cboxErode.isChecked()      else 0,
+            "dilation1"     : self.sliderDilation.value()   if self.cboxDilate.isChecked()     else 0,
+            "erosion2"      : self.sliderErosion2.value()   if self.cboxErode2.isChecked()     else 0,
+            "dilation2"     : self.sliderDilation2.value()  if self.cboxDilate2.isChecked()    else 0,
+            "trim_header"   : self.sliderTrimHeader.value() if self.cboxTrimHeader.isChecked() else 0,
+            "trim_footer"   : self.sliderTrimFooter.value() if self.cboxTrimFooter.isChecked() else self.sliderTrimFooter.maximum(),
+            "trim_left"     : self.sliderTrimLeft.value()   if self.cboxTrimLeft.isChecked()   else 0,
+            "trim_right"    : self.sliderTrimRight.value()  if self.cboxTrimRight.isChecked()  else self.sliderTrimRight.maximum(),
+            "inverse_mask"  : self.cboxInverseMask.isChecked(),
         }
 
 
