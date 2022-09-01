@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         self.cboxInverseHSV.stateChanged.connect(self.updateMask)
         self.cboxInverseMask.stateChanged.connect(self.updateMask)
         self.btnOpen.clicked.connect(self.onBtnOpenClicked)
-        self.btnPrint.clicked.connect(self.onBtnCopyClicked)
+        self.btnPrint.clicked.connect(self.onBtnPrintClicked)
 
         self.btnFirst.clicked.connect(self.onBtnFirstClicked)
         self.btnPrev.clicked.connect(self.onBtnPrevClicked)
@@ -191,34 +191,38 @@ class MainWindow(QMainWindow):
         self.btnUnloadPluginFile.clicked.connect(self.onUnloadPluginFile)
 
 
-    def onBtnCopyClicked(self):
-        print("====================")
-        print("Lower HSV: ", self.lowerHSV)
-        print("Upper HSV: ", self.upperHSV)
+    def onBtnPrintClicked(self):
+        seq  = 0
+        info = []
+        info.append(("Lower HSV:", f"{self.lowerHSV}"))
+        info.append(("Upper HSV:", f"{self.upperHSV}"))
 
         if self.cboxInverseHSV.isChecked():
-            print("Inverse HSV Selection: yes")
+            info.append(("Inverse HSV Selection:", f"yes"))
 
-        if self.cboxErode.isChecked():
-            print("Erode: ", self.sliderErosion.value())
-        if self.cboxDilate.isChecked():
-            print("Dilate: ", self.sliderDilation.value())
-        if self.cboxErode2.isChecked():
-            print("Erode: ", self.sliderErosion2.value())
-        if self.cboxDilate2.isChecked():
-            print("Dilate: ", self.sliderDilation2.value())
+        if self.cboxErode.isChecked() and self.sliderErosion.value() > 1:
+            info.append(("Erode Kernel:", f"{self.sliderErosion.value()}"))
+        if self.cboxDilate.isChecked() and self.sliderDilation.value() > 1:
+            info.append(("Dilate Kernel:", f"{self.sliderDilation.value()}"))
+        if self.cboxErode2.isChecked() and self.sliderErosion2.value() > 1:
+            info.append(("Erode Kernel:", f"{self.sliderErosion2.value()}"))
+        if self.cboxDilate2.isChecked() and self.sliderDilation2.value() > 1:
+            info.append(("Dilate Kernel:", f"{self.sliderDilation2.value()}"))
 
         if self.cboxTrimHeader.isChecked() and self.sliderTrimHeader.value() > 0:
-            print("Trim Header: ", self.sliderTrimHeader.value())
+            info.append(("Trim Header:", f"{self.sliderTrimHeader.value()}"))
         if self.cboxTrimFooter.isChecked() and self.sliderTrimFooter.value() < self.sliderTrimFooter.maximum():
-            print("Trim Footer: ", self.sliderTrimFooter.value())
-        if self.cboxTrimLeft.isChecked() and self.sliderTrimLeft.value() < self.sliderTrimLeft.maximum():
-            print("Trim Left: ", self.sliderTrimLeft.value())
+            info.append(("Trim Footer:", f"{self.sliderTrimFooter.value()}"))
+        if self.cboxTrimLeft.isChecked() and self.sliderTrimLeft.value() > 0:
+            info.append(("Trim Left:", f"{self.sliderTrimLeft.value()}"))
         if self.cboxTrimRight.isChecked() and self.sliderTrimRight.value() < self.sliderTrimRight.maximum():
-            print("Trim Right: ", self.sliderTrimRight.value())
+            info.append(("Trim Right:", f"{self.sliderTrimRight.value()}"))
 
         if self.cboxInverseMask.isChecked():
-            print("Inverse Mask: yes")
+            info.append(("Inverse Mask:", f"yes"))
+
+        self.pluginOutput.setHtml("<table>" + "\n".join(f"<tr><td>{key}</td><td>{value}</td></tr>" for (key, value) in info) + "</table>")
+
 
     # =========== Helper ===========
     def updatePreviewHsvSpace(self):
@@ -366,7 +370,7 @@ class MainWindow(QMainWindow):
                     if len(result) >= 1:
                         frame_threshold = result[0]
                     if len(result) >= 2:
-                        self.pluginOutput.setPlainText(json.dumps(result[1], indent=4))
+                        self.pluginOutput.setPlainText(f"Plugin {os.path.basename(self.plugin.__file__)} output:\n{json.dumps(result[1], indent=4)}\n")
                 else:
                     frame_threshold = result
 
@@ -621,6 +625,8 @@ class MainWindow(QMainWindow):
             self.settings["profile"] = {}
         if "folders" not in self.settings:
             self.settings["folders"] = []
+        if "plugins" not in self.settings:
+            self.settings["plugins"] = []
 
         self.syncProfile(self.settings["profile"].get("default", {}))
 
@@ -657,6 +663,45 @@ class MainWindow(QMainWindow):
             self.cboxFolderName.insertItem(0, folderName, path)
 
         self.cboxFolderName.setCurrentIndex(-1)
+
+        self.cboxSwitchPluginFile.clear()
+        plugins = sorted(glob(os.path.join(os.path.dirname(__file__), "plugins", "*.py")))
+        for path in plugins:
+            pluginName = os.path.basename(path)
+            ndx = self.cboxSwitchPluginFile.findText(pluginName, Qt.MatchExactly)
+
+            dup = 0
+            while ndx >= 0:
+                dup += 1
+                ndx = self.cboxSwitchPluginFile.findText(f"{pluginName}({dup})", Qt.MatchExactly)
+
+            if dup > 0:
+                pluginName = f"{pluginName}({dup})"
+
+            self.cboxSwitchPluginFile.insertItem(0, pluginName, path)
+            try:
+                self.settings["plugins"].remove(path)
+            except:
+                pass
+
+        for path in reversed(self.settings["plugins"][:20]):
+            if not os.path.exists(path):
+                continue
+
+            pluginName = os.path.basename(path)
+            ndx = self.cboxSwitchPluginFile.findText(pluginName, Qt.MatchExactly)
+
+            dup = 0
+            while ndx >= 0:
+                dup += 1
+                ndx = self.cboxSwitchPluginFile.findText(f"{pluginName}({dup})", Qt.MatchExactly)
+
+            if dup > 0:
+                pluginName = f"{pluginName}({dup})"
+
+            self.cboxSwitchPluginFile.insertItem(0, pluginName, path)
+
+        self.cboxSwitchPluginFile.setCurrentIndex(-1)
 
 
     def syncProfile(self, profile):
@@ -764,10 +809,22 @@ class MainWindow(QMainWindow):
     def saveSettings(self):
         self.settings["profile"]["default"] = self.snapshotCurrentProfile()
         self.settings["folders"] = []
+        self.settings["plugins"] = []
 
         for ndx in range(self.cboxFolderName.count()):
             path = self.cboxFolderName.itemData(ndx)
             self.settings["folders"].append(path)
+
+        plugin_basepath = os.path.join(os.path.dirname(__file__), "plugins")
+
+        for ndx in range(self.cboxSwitchPluginFile.count() - 1, -1, -1):
+            path = self.cboxSwitchPluginFile.itemData(ndx)
+            if not os.path.exists(path):
+                self.cboxSwitchPluginFile.removeItem(ndx)
+                continue
+
+            if os.path.dirname(path) != plugin_basepath:
+                self.settings["plugins"].insert(0, path)
 
         try:
             with open("HsvRangeTool.json", "w") as fp:
@@ -855,7 +912,13 @@ class MainWindow(QMainWindow):
                     self.pluginOutput.setPlainText("")
                     self.refreshAllImg()
                 else:
-                    self.pluginOutput.setPlainText(f"Missing process_image(image, mask) function while loading plugin file {filePath}")
+                    self.pluginOutput.setPlainText(f"Missing process_image function while loading plugin file {filePath}\n\n"
+                        "# example source code:\n"
+                        "import cv2\n\n"
+                        "def process_image(image, mask):\n"
+                        "   output = cv2.bitwise_and(image, image, mask=mask)\n"
+                        "   return output, {}\n\n"
+                    )
 
             except BaseException as e:
                 import traceback
@@ -882,9 +945,12 @@ class MainWindow(QMainWindow):
     def onDropPluginFile(self):
         ndx = self.cboxSwitchPluginFile.currentIndex()
         if ndx >= 0:
-            self.cboxSwitchPluginFile.setCurrentIndex(-1)
-            self.cboxSwitchPluginFile.removeItem(ndx)
-            self._loadPluginFile(None)
+            plugin_basepath = os.path.join(os.path.dirname(__file__), "plugins")
+
+            if os.path.dirname(self.cboxSwitchPluginFile.itemData(ndx)) != plugin_basepath:
+                self.cboxSwitchPluginFile.setCurrentIndex(-1)
+                self.cboxSwitchPluginFile.removeItem(ndx)
+                self._loadPluginFile(None)
 
 
     def onReloadPluginFile(self):
