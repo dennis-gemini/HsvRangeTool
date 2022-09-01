@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
@@ -31,239 +31,246 @@
         <property name="title">
          <string>HSV Selection</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,1,0">
-         <property name="topMargin">
-          <number>0</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QComboBox" name="cboxSetMode">
+             <item>
+              <property name="text">
+               <string>Upper HSV</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Lower HSV</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Lower:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="lblLower">
+               <property name="text">
+                <string>0, 0, 0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>Upper:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLabel" name="lblUpper">
+               <property name="text">
+                <string>179, 255, 255</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+	 </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,1,0">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_0">
+             <property name="text">
+              <string>Hue</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="lblH">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>179</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QSlider" name="sliderH">
+             <property name="maximum">
+              <number>359</number>
+             </property>
+             <property name="value">
+              <number>359</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLabel" name="previewH">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
 
-         <item row="0" column="0">
-          <widget class="QComboBox" name="cboxSetMode">
-           <item>
-            <property name="text">
-             <string>Upper HSV</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Lower HSV</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_10">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_1">
              <property name="text">
-              <string>Lower:</string>
+              <string>Saturation</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="lblLower">
+           <item row="2" column="1">
+            <widget class="QLabel" name="lblS">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string>0, 0, 0</string>
+              <string>255</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>Upper:</string>
+           <item row="2" column="2">
+            <widget class="QSlider" name="sliderS">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>255</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QLabel" name="lblUpper">
+           <item row="2" column="3">
+            <widget class="QLabel" name="previewS">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
              <property name="text">
-              <string>179, 255, 255</string>
+              <string/>
+             </property>
+            </widget>
+           </item>
+
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Value</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="lblV">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>255</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QSlider" name="sliderV">
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>255</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="previewV">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
           </layout>
          </item>
 
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_0">
-           <property name="text">
-            <string>Hue</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="lblH">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>179</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QSlider" name="sliderH">
-           <property name="maximum">
-            <number>359</number>
-           </property>
-           <property name="value">
-            <number>359</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QLabel" name="previewH">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_1">
-           <property name="text">
-            <string>Saturation</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="lblS">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>255</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QSlider" name="sliderS">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximum">
-            <number>255</number>
-           </property>
-           <property name="value">
-            <number>255</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QLabel" name="previewS">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Value</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="lblV">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>255</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QSlider" name="sliderV">
-           <property name="maximum">
-            <number>255</number>
-           </property>
-           <property name="value">
-            <number>255</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="3">
-          <widget class="QLabel" name="previewV">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>50</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-
-         <item row="4" column="0">
+         <item>
           <widget class="QCheckBox" name="cboxInverseHSV">
            <property name="text">
             <string>Inverse Selection</string>
            </property>
           </widget>
          </item>
+
         </layout>
        </widget>
       </item>
@@ -524,6 +531,69 @@
       </item>
 
       <item>
+       <widget class="QGroupBox" name="groupBox_8">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Plugin Management</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="0,1,0,0,0">
+
+         <item>
+          <widget class="QPushButton" name="btnOpenPluginFile">
+           <property name="text">
+            <string>Open</string>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <widget class="QComboBox" name="cboxSwitchPluginFile">
+          </widget>
+         </item>
+
+         <item>
+          <widget class="QPushButton" name="btnDropPluginFile">
+           <property name="toolTip">
+            <string>Remove plugin access history</string>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>x</string>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <widget class="QPushButton" name="btnReloadPluginFile">
+           <property name="text">
+            <string>Reload</string>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <widget class="QPushButton" name="btnUnloadPluginFile">
+           <property name="text">
+            <string>Unload</string>
+           </property>
+          </widget>
+         </item>
+
+        </layout>
+       </widget>
+      </item>
+
+      <item>
        <widget class="QGroupBox" name="groupBox_9">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -589,7 +659,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnCopy">
+          <widget class="QPushButton" name="btnPrint">
            <property name="text">
             <string>Print</string>
            </property>
@@ -810,9 +880,30 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_7">
+       <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,1">
+        <item>
+         <widget class="QTextEdit" name="pluginOutput">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+
         <item>
          <widget class="QLabel" name="previewHsvSpace">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+
           <property name="frameShape">
            <enum>QFrame::Box</enum>
           </property>
@@ -821,6 +912,7 @@
           </property>
          </widget>
         </item>
+
        </layout>
       </item>
       <item row="1" column="1">

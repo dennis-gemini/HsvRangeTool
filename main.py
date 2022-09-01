@@ -7,10 +7,11 @@ from PyQt5 import uic
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QColor, QImage, QPixmap, QKeySequence
-from PyQt5.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QMainWindow, QLabel, QPushButton, QSlider, QShortcut
+from PyQt5.QtWidgets import QApplication, QCheckBox, QComboBox, QFileDialog, QMainWindow, QLabel, QPushButton, QSlider, QShortcut, QTextEdit
 import cv2
 import numpy as np
 import os
+import importlib
 
 
 def generateSolidColorPixmap(w, h, color):
@@ -22,68 +23,94 @@ def generateSolidColorPixmap(w, h, color):
 
 
 class MainWindow(QMainWindow):
-    selectedHue = 359
+    selectedHue        = 359
     selectedSaturation = 255
-    selectedValue = 255
+    selectedValue      = 255
 
-    lowerHSV = (0, 0, 0)
-    upperHSV = (179, 255, 255)
-    fileName = ""
-    settings = {}
+    lowerHSV    = (0, 0, 0)
+    upperHSV    = (179, 255, 255)
+    fileName    = ""
+    settings    = {}
 
-    imgRaw = None
-    imgMask = None
-    imgMasked = None
-
+    imgRaw      = None
+    imgMask     = None
+    imgMasked   = None
     imgHsvSpace = None
+
+    plugin      = None
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi(os.path.join(os.path.dirname(
-            __file__), "./assets/main_window.ui"), self)
+        uic.loadUi(os.path.join(os.path.dirname(__file__), "./assets/main_window.ui"), self)
         self.showMaximized()
 
-        self.sliderH = self.findChild(QSlider, "sliderH")
-        self.sliderS = self.findChild(QSlider, "sliderS")
-        self.sliderV = self.findChild(QSlider, "sliderV")
+        self.sliderH              = self.findChild(QSlider,     "sliderH"             )
+        self.sliderS              = self.findChild(QSlider,     "sliderS"             )
+        self.sliderV              = self.findChild(QSlider,     "sliderV"             )
 
-        self.lblH = self.findChild(QLabel, "lblH")
-        self.lblS = self.findChild(QLabel, "lblS")
-        self.lblV = self.findChild(QLabel, "lblV")
+        self.lblH                 = self.findChild(QLabel,      "lblH"                )
+        self.lblS                 = self.findChild(QLabel,      "lblS"                )
+        self.lblV                 = self.findChild(QLabel,      "lblV"                )
 
-        self.lblLower = self.findChild(QLabel, "lblLower")
-        self.lblUpper = self.findChild(QLabel, "lblUpper")
+        self.lblLower             = self.findChild(QLabel,      "lblLower"            )
+        self.lblUpper             = self.findChild(QLabel,      "lblUpper"            )
 
-        self.previewH = self.findChild(QLabel, "previewH")
-        self.previewS = self.findChild(QLabel, "previewS")
-        self.previewV = self.findChild(QLabel, "previewV")
+        self.previewH             = self.findChild(QLabel,      "previewH"            )
+        self.previewS             = self.findChild(QLabel,      "previewS"            )
+        self.previewV             = self.findChild(QLabel,      "previewV"            )
 
-        self.previewRaw = self.findChild(QLabel, "previewRaw")
-        self.previewMask = self.findChild(QLabel, "previewMask")
-        self.previewMaskedRaw = self.findChild(QLabel, "previewMaskedRaw")
-        self.previewHsvSpace = self.findChild(QLabel, "previewHsvSpace")
+        self.previewRaw           = self.findChild(QLabel,      "previewRaw"          )
+        self.previewMask          = self.findChild(QLabel,      "previewMask"         )
+        self.previewMaskedRaw     = self.findChild(QLabel,      "previewMaskedRaw"    )
+        self.previewHsvSpace      = self.findChild(QLabel,      "previewHsvSpace"     )
 
-        self.cboxSetMode      = self.findChild(QComboBox, "cboxSetMode")
-        self.cboxInverseHSV   = self.findChild(QCheckBox, "cboxInverseHSV")
-        self.cboxInverseMask  = self.findChild(QCheckBox, "cboxInverseMask")
+        self.cboxSetMode          = self.findChild(QComboBox,   "cboxSetMode"         )
+        self.cboxInverseHSV       = self.findChild(QCheckBox,   "cboxInverseHSV"      )
+        self.cboxInverseMask      = self.findChild(QCheckBox,   "cboxInverseMask"     )
 
-        self.cboxErode        = self.findChild(QCheckBox, "cboxErode"      )
-        self.sliderErosion    = self.findChild(QSlider,   "sliderErosion"  )
-        self.cboxDilate       = self.findChild(QCheckBox, "cboxDilate"     )
-        self.sliderDilation   = self.findChild(QSlider,   "sliderDilation" )
-        self.cboxErode2       = self.findChild(QCheckBox, "cboxErode2"     )
-        self.sliderErosion2   = self.findChild(QSlider,   "sliderErosion2" )
-        self.cboxDilate2      = self.findChild(QCheckBox, "cboxDilate2"    )
-        self.sliderDilation2  = self.findChild(QSlider,   "sliderDilation2")
+        self.cboxErode            = self.findChild(QCheckBox,   "cboxErode"           )
+        self.sliderErosion        = self.findChild(QSlider,     "sliderErosion"       )
+        self.cboxDilate           = self.findChild(QCheckBox,   "cboxDilate"          )
+        self.sliderDilation       = self.findChild(QSlider,     "sliderDilation"      )
+        self.cboxErode2           = self.findChild(QCheckBox,   "cboxErode2"          )
+        self.sliderErosion2       = self.findChild(QSlider,     "sliderErosion2"      )
+        self.cboxDilate2          = self.findChild(QCheckBox,   "cboxDilate2"         )
+        self.sliderDilation2      = self.findChild(QSlider,     "sliderDilation2"     )
 
-        self.cboxTrimHeader   = self.findChild(QCheckBox, "cboxTrimHeader"  )
-        self.sliderTrimHeader = self.findChild(QSlider,   "sliderTrimHeader")
-        self.cboxTrimFooter   = self.findChild(QCheckBox, "cboxTrimFooter"  )
-        self.sliderTrimFooter = self.findChild(QSlider,   "sliderTrimFooter")
-        self.cboxTrimLeft     = self.findChild(QCheckBox, "cboxTrimLeft"    )
-        self.sliderTrimLeft   = self.findChild(QSlider,   "sliderTrimLeft"  )
-        self.cboxTrimRight    = self.findChild(QCheckBox, "cboxTrimRight"   )
-        self.sliderTrimRight  = self.findChild(QSlider,   "sliderTrimRight" )
+        self.cboxTrimHeader       = self.findChild(QCheckBox,   "cboxTrimHeader"      )
+        self.sliderTrimHeader     = self.findChild(QSlider,     "sliderTrimHeader"    )
+        self.cboxTrimFooter       = self.findChild(QCheckBox,   "cboxTrimFooter"      )
+        self.sliderTrimFooter     = self.findChild(QSlider,     "sliderTrimFooter"    )
+        self.cboxTrimLeft         = self.findChild(QCheckBox,   "cboxTrimLeft"        )
+        self.sliderTrimLeft       = self.findChild(QSlider,     "sliderTrimLeft"      )
+        self.cboxTrimRight        = self.findChild(QCheckBox,   "cboxTrimRight"       )
+        self.sliderTrimRight      = self.findChild(QSlider,     "sliderTrimRight"     )
+
+        self.pluginOutput         = self.findChild(QTextEdit,   "pluginOutput"        )
+        self.btnOpenPluginFile    = self.findChild(QPushButton, "btnOpenPluginFile"   )
+        self.cboxSwitchPluginFile = self.findChild(QComboBox,   "cboxSwitchPluginFile")
+        self.btnDropPluginFile    = self.findChild(QPushButton, "btnDropPluginFile"   )
+        self.btnReloadPluginFile  = self.findChild(QPushButton, "btnReloadPluginFile" )
+        self.btnUnloadPluginFile  = self.findChild(QPushButton, "btnUnloadPluginFile" )
+
+        self.btnOpen              = self.findChild(QPushButton, "btnOpen"             )
+        self.btnPrint             = self.findChild(QPushButton, "btnPrint"            )
+
+        self.btnFirst             = self.findChild(QPushButton, "btnFirst"            )
+        self.btnPrev              = self.findChild(QPushButton, "btnPrev"             )
+        self.btnNext              = self.findChild(QPushButton, "btnNext"             )
+        self.btnLast              = self.findChild(QPushButton, "btnLast"             )
+        self.lblFileName          = self.findChild(QLabel,      "lblFileName"         )
+        self.cboxFolderName       = self.findChild(QComboBox,   "cboxFolderName"      )
+        self.btnDropFolderName    = self.findChild(QPushButton, "btnDropFolderName"   )
+
+        self.btnLoad              = self.findChild(QPushButton, "btnLoad"             )
+        self.btnSave              = self.findChild(QPushButton, "btnSave"             )
+
+        self.cboxProfile          = self.findChild(QComboBox,   "cboxProfile"         )
+        self.btnSnapshotProfile   = self.findChild(QPushButton, "btnSnapshotProfile"  )
+        self.btnDeleteProfile     = self.findChild(QPushButton, "btnDeleteProfile"    )
+        self.btnResetProfile      = self.findChild(QPushButton, "btnResetProfile"     )
 
         self.sliderTrimHeader.setMaximum(480)
         self.sliderTrimHeader.setValue(0)
@@ -93,25 +120,6 @@ class MainWindow(QMainWindow):
         self.sliderTrimLeft.setValue(0)
         self.sliderTrimRight.setMaximum(640)
         self.sliderTrimRight.setValue(640)
-
-        self.btnOpen = self.findChild(QPushButton, "btnOpen")
-        self.btnCopy = self.findChild(QPushButton, "btnCopy")
-
-        self.btnFirst           = self.findChild(QPushButton, "btnFirst")
-        self.btnPrev            = self.findChild(QPushButton, "btnPrev")
-        self.btnNext            = self.findChild(QPushButton, "btnNext")
-        self.btnLast            = self.findChild(QPushButton, "btnLast")
-        self.lblFileName        = self.findChild(QLabel,      "lblFileName")
-        self.cboxFolderName     = self.findChild(QComboBox,   "cboxFolderName")
-        self.btnDropFolderName  = self.findChild(QPushButton, "btnDropFolderName")
-
-        self.btnLoad            = self.findChild(QPushButton, "btnLoad")
-        self.btnSave            = self.findChild(QPushButton, "btnSave")
-
-        self.cboxProfile        = self.findChild(QComboBox,   "cboxProfile")
-        self.btnSnapshotProfile = self.findChild(QPushButton, "btnSnapshotProfile")
-        self.btnDeleteProfile   = self.findChild(QPushButton, "btnDeleteProfile")
-        self.btnResetProfile    = self.findChild(QPushButton, "btnResetProfile")
 
         self.init_handler()
         self.loadHsvSpace()
@@ -132,7 +140,7 @@ class MainWindow(QMainWindow):
         self.cboxInverseHSV.stateChanged.connect(self.updateMask)
         self.cboxInverseMask.stateChanged.connect(self.updateMask)
         self.btnOpen.clicked.connect(self.onBtnOpenClicked)
-        self.btnCopy.clicked.connect(self.onBtnCopyClicked)
+        self.btnPrint.clicked.connect(self.onBtnCopyClicked)
 
         self.btnFirst.clicked.connect(self.onBtnFirstClicked)
         self.btnPrev.clicked.connect(self.onBtnPrevClicked)
@@ -176,6 +184,13 @@ class MainWindow(QMainWindow):
         self.btnDeleteProfile.clicked.connect(self.onDeleteProfile)
         self.btnResetProfile.clicked.connect(self.onResetProfile)
 
+        self.btnOpenPluginFile.clicked.connect(self.onOpenPluginFile)
+        self.cboxSwitchPluginFile.textActivated.connect(self.onSwitchPluginFile)
+        self.btnDropPluginFile.clicked.connect(self.onDropPluginFile)
+        self.btnReloadPluginFile.clicked.connect(self.onReloadPluginFile)
+        self.btnUnloadPluginFile.clicked.connect(self.onUnloadPluginFile)
+
+
     def onBtnCopyClicked(self):
         print("====================")
         print("Lower HSV: ", self.lowerHSV)
@@ -217,35 +232,27 @@ class MainWindow(QMainWindow):
         frame_threshold = cv2.inRange(frame_HSV, lower_range, upper_range)
         frame_threshold = cv2.bitwise_and(self.imgHsvSpace, self.imgHsvSpace, mask=frame_threshold)
 
-        _asQImage = QImage(
-            frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
+        _asQImage = QImage(frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
         self.previewHsvSpace.setPixmap(QPixmap.fromImage(_asQImage).scaledToWidth(self.previewMask.size().width()))
 
 
     def updateHSVPreview(self):
-        prevH = generateSolidColorPixmap(
-            200, 300, QColor.fromHsv(self.selectedHue, 255, 255))
+        prevH = generateSolidColorPixmap(200, 300, QColor.fromHsv(self.selectedHue, 255, 255))
         self.previewH.setPixmap(QPixmap.fromImage(prevH))
 
-        prevS = generateSolidColorPixmap(
-            200, 300, QColor.fromHsv(self.selectedHue, self.selectedSaturation, 255))
+        prevS = generateSolidColorPixmap(200, 300, QColor.fromHsv(self.selectedHue, self.selectedSaturation, 255))
         self.previewS.setPixmap(QPixmap.fromImage(prevS))
 
-        prevV = generateSolidColorPixmap(
-            200, 300, QColor.fromHsv(self.selectedHue, self.selectedSaturation, self.selectedValue))
+        prevV = generateSolidColorPixmap(200, 300, QColor.fromHsv(self.selectedHue, self.selectedSaturation, self.selectedValue))
         self.previewV.setPixmap(QPixmap.fromImage(prevV))
 
         if self.cboxSetMode.currentIndex() == 0:
-            self.upperHSV = (self.selectedHue // 2,
-                             self.selectedSaturation, self.selectedValue)
-            self.lblUpper.setText(
-                f"{self.upperHSV[0]}, {self.upperHSV[1]}, {self.upperHSV[2]}")
+            self.upperHSV = (self.selectedHue // 2, self.selectedSaturation, self.selectedValue)
+            self.lblUpper.setText(f"{self.upperHSV[0]}, {self.upperHSV[1]}, {self.upperHSV[2]}")
         elif self.cboxSetMode.currentIndex() == 1:
-            self.lowerHSV = (self.selectedHue // 2,
-                             self.selectedSaturation, self.selectedValue)
-            self.lblLower.setText(
-                f"{self.lowerHSV[0]}, {self.lowerHSV[1]}, {self.lowerHSV[2]}")
+            self.lowerHSV = (self.selectedHue // 2, self.selectedSaturation, self.selectedValue)
+            self.lblLower.setText(f"{self.lowerHSV[0]}, {self.lowerHSV[1]}, {self.lowerHSV[2]}")
         
         self.updateMask()
         self.updatePreviewHsvSpace()
@@ -263,13 +270,11 @@ class MainWindow(QMainWindow):
             self.updateHSVPreview()
             return
 
-        _imgAsQImg = QImage(
-            self.imgRaw.data, self.imgRaw.shape[1], self.imgRaw.shape[0], QImage.Format_RGB888).rgbSwapped()
+        _imgAsQImg = QImage(self.imgRaw.data, self.imgRaw.shape[1], self.imgRaw.shape[0], QImage.Format_RGB888).rgbSwapped()
 
         # self.imgRaw = img.scaled(200,100, QtCore.KeepAspectRatio)
         # self.imgRaw = img.scaledToHeight(self.previewMask.size().height())
-        self.previewRaw.setPixmap(QPixmap.fromImage(
-            _imgAsQImg).scaledToWidth(self.previewRaw.size().width()))
+        self.previewRaw.setPixmap(QPixmap.fromImage(_imgAsQImg).scaledToWidth(self.previewRaw.size().width()))
         self.updateMask()
         self.updateHSVPreview()
 
@@ -342,10 +347,8 @@ class MainWindow(QMainWindow):
         self.updateMaskedRaw(frame_threshold)
         frame_threshold = cv2.cvtColor(frame_threshold, cv2.COLOR_GRAY2RGB)
 
-        _asQImage = QImage(
-            frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
+        _asQImage = QImage(frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
-        #self.previewMask.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMask.size().height()))
         self.previewMask.setPixmap(QPixmap.fromImage(_asQImage).scaledToWidth(self.previewMask.size().width()))
 
 
@@ -353,27 +356,37 @@ class MainWindow(QMainWindow):
         if self.imgRaw is None:
             return
 
-        frame_threshold = cv2.bitwise_and(self.imgRaw, self.imgRaw, mask=masking)
+        frame_threshold = None
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        edges = cv2.GaussianBlur(masking, (5, 5), 0)
-        edges = cv2.Canny(edges, 50, 150)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations = 2)
+        if self.plugin:
+            result = self.plugin.process_image(self.imgRaw, masking)
 
-        contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        for c in sorted(contours, key = cv2.contourArea, reverse = True):
-            epsilon = 0.01 * cv2.arcLength(c, True) 
-            approx  = cv2.approxPolyDP(c, epsilon, True)
-            cv2.drawContours(frame_threshold, [approx], 0, (255, 0, 0), 1)
+            if result is not None:
+                if isinstance(result, (tuple, list)):
+                    if len(result) >= 1:
+                        frame_threshold = result[0]
+                    if len(result) >= 2:
+                        self.pluginOutput.setPlainText(json.dumps(result[1], indent=4))
+                else:
+                    frame_threshold = result
 
-        _asQImage = QImage(
-            frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
+        if frame_threshold is None:
+            frame_threshold = cv2.bitwise_and(self.imgRaw, self.imgRaw, mask=masking)
+
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+            edges  = cv2.GaussianBlur(masking, (5, 5), 0)
+            edges  = cv2.Canny(edges, 50, 150)
+            edges  = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations = 2)
+
+            contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            for c in sorted(contours, key = cv2.contourArea, reverse = True):
+                epsilon = 0.01 * cv2.arcLength(c, True) 
+                approx  = cv2.approxPolyDP(c, epsilon, True)
+                cv2.drawContours(frame_threshold, [approx], 0, (255, 0, 0), 1)
+
+        _asQImage = QImage(frame_threshold.data, frame_threshold.shape[1], frame_threshold.shape[0], frame_threshold.shape[1]*3,  QtGui.QImage.Format_RGB888)
         _asQImage = _asQImage.rgbSwapped()
-        #self.previewMaskedRaw.setPixmap(QPixmap.fromImage(_asQImage).scaledToHeight(self.previewMaskedRaw.size().height()))
         self.previewMaskedRaw.setPixmap(QPixmap.fromImage(_asQImage).scaledToWidth(self.previewMaskedRaw.size().width()))
-
-
-
 
     # =========== EVENT HANDLER ===========
 
@@ -800,6 +813,90 @@ class MainWindow(QMainWindow):
 
     def onResetProfile(self):
         self.syncProfile({})
+
+
+    def _loadPluginFile(self, filePath):
+        self.pluginOutput.setPlainText("")
+        self.plugin = None
+
+        if filePath:
+            found = False
+            for ndx in range(self.cboxSwitchPluginFile.count()):
+                if self.cboxSwitchPluginFile.itemData(ndx) == filePath:
+                    self.cboxSwitchPluginFile.setCurrentIndex(ndx)
+                    found = True
+                    break
+
+            if not found:
+                fileName = os.path.basename(filePath)
+                ndx = self.cboxSwitchPluginFile.findText(fileName, Qt.MatchExactly)
+
+                dup = 0
+                while ndx >= 0:
+                    dup += 1
+                    ndx = self.cboxFolderName.findText(f"{fileName}({dup})", Qt.MatchExactly)
+
+                if dup > 0:
+                    fileName = f"{fileName}({dup})"
+
+                self.cboxSwitchPluginFile.insertItem(0, fileName, filePath)
+                self.cboxSwitchPluginFile.setCurrentIndex(0)
+
+                while self.cboxSwitchPluginFile.count() > 20:
+                    self.cboxSwitchPluginFile.removeItem(self.cboxSwitchPluginFile.count() - 1)
+
+            try:
+                _spec   = importlib.util.spec_from_file_location("plugin", filePath)
+                _plugin = importlib.util.module_from_spec(_spec)
+                _spec.loader.exec_module(_plugin)
+
+                if 'process_image' in _plugin.__dict__:
+                    self.plugin = _plugin
+                    self.pluginOutput.setPlainText("")
+                    self.refreshAllImg()
+                else:
+                    self.pluginOutput.setPlainText(f"Missing process_image(image, mask) function while loading plugin file {filePath}")
+
+            except BaseException as e:
+                import traceback
+                self.pluginOutput.setPlainText(f"Exception occurred while loading plugin file {filePath}: {str(e)}\n{traceback.format_exc()}")
+
+
+    def onOpenPluginFile(self):
+        options     = QFileDialog.Options()
+        filePath, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", "All Files (*);;Python3 Source (*.py)", options=options)
+
+        if not filePath:
+            return
+
+        self._loadPluginFile(filePath)
+
+
+    def onSwitchPluginFile(self):
+        ndx = self.cboxSwitchPluginFile.currentIndex()
+        if ndx >= 0:
+            filePath = self.cboxSwitchPluginFile.itemData(ndx)
+            self._loadPluginFile(filePath)
+
+
+    def onDropPluginFile(self):
+        ndx = self.cboxSwitchPluginFile.currentIndex()
+        if ndx >= 0:
+            self.cboxSwitchPluginFile.setCurrentIndex(-1)
+            self.cboxSwitchPluginFile.removeItem(ndx)
+            self._loadPluginFile(None)
+
+
+    def onReloadPluginFile(self):
+        ndx = self.cboxSwitchPluginFile.currentIndex()
+        if ndx >= 0:
+            filePath = self.cboxSwitchPluginFile.itemData(ndx)
+            self._loadPluginFile(filePath)
+
+
+    def onUnloadPluginFile(self):
+        self.cboxSwitchPluginFile.setCurrentIndex(-1)
+        self._loadPluginFile(None)
 
 
 if __name__ == "__main__":
